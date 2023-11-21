@@ -9,6 +9,25 @@
 #define TYPES_H_
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_LENGTH 512
+#define NCMD 7
+
+/**
+ * @brief ADT command
+ */
+typedef enum {
+  NO_CMD = -1,
+  EXIT,
+  ADD,
+  FIND,
+  DEL,
+  PRINTIND,
+  PRINTLST,
+  PRINTREC
+} Command;
 
 /**
  * @brief ADT Boolean
