@@ -3,18 +3,14 @@
 
 #include "types.h"
 #include "file_utils.h"
+#include "book.h"
 /**
- * BSTree type definition: a binary search of arbitrary elements.
+ * Index type definition: a binary search of arbitrary elements.
  */
 typedef struct _Index Index;
 
 /**
  * @brief Public function that creates a new BSTree.
- *
- * Allocates memory for the new Tree. When creating a Tree it is necessary to
- * specify the pointers to functions that:
- * - Print a Tree element.
- * - Compare two elements.
  *
  * @param print_ele Pointer to the function that prints a Tree element.
  * @param cmp_ele Pointer to the function that compares two Tree elements
@@ -177,5 +173,7 @@ Status index_insert(Index *index, const void *elem);
  * in the BST, Status value ERROR otherwise.
  */
 Status index_remove(Index *index, const void *elem);
+
+
 
 #endif

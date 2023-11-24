@@ -6,7 +6,8 @@ void loop(Index *index){
     char *cmd_to_str[NCMD] = {"exit", "add", "find", "del", "printInd", "printLst", "printRec"};
     int i=0;
     int len;
-    char *id, *isbn, *title, *printedBy;
+    long id;
+    char *isbn, *title, *printedBy;
 
     while (cmd != EXIT){
         i = 0;
@@ -23,15 +24,16 @@ void loop(Index *index){
             i++;
         }
 
-        id = strtoi(strtok(NULL, "|"));
-        isbn = strtok(NULL, "|");
-        title = strtok(NULL, "|");
-        printedBy = strtok(NULL, " ");
+        
 
         switch(cmd){
             case EXIT:
                 break;
             case ADD:
+                id = strtol(strtok(NULL, "|"), NULL, 10);
+                isbn = strtok(NULL, "|");
+                title = strtok(NULL, "|");
+                printedBy = strtok(NULL, " ");
                 add(index, id, isbn, title, printedBy);
             case FIND:
                 /*función que busca una entrada*/
@@ -49,14 +51,33 @@ void loop(Index *index){
     }
 }
 
+Status loop_init(Index *index, FILE *pf){
+    index = index_init(indexbook_print, indexbook_cmp);
+
+    if (!index) return ERROR;
+
+    /*cargar datos del fichero*/
+
+    return OK;
+
+}
+
+void loop_end(Index *index, FILE *pf){
+
+    /*guadar datos en el fichero*/
+
+    index_destroy(index);
+}
+
 int main(int argc, char *argv[]){
     Index *index = NULL;
-    if (argc )
-    /*función para cargar los datos de un fichero*/
+    FILE *f = NULL;
 
-    loop(index);
-
-    /*función para guardar los datos en un fichero*/
+    
+    if (loop_init(index, f) == OK){
+        loop(index);
+        loop_end(index, f);
+    }
 
     return 0;
 }

@@ -44,6 +44,7 @@ int string_cmp (const void *c1, const void *c2);
 void string_free (void *str); 
 int string_print (FILE *pf, const void *str); 
 
+
 //---------------------------------------------------------
 //---------------- conversion functions -------------------
 //---------------------------------------------------------
