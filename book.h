@@ -4,119 +4,128 @@
 #include "types.h"
 
 /**
- * Index type definition: a binary search of arbitrary elements.
- */
-typedef struct _IndexBook IndexBook;
+ * Book type definition.
+*/
+typedef struct _Book Book;
 
 /**
- * @brief Constructor. Initialize a indexbook.
+ * @brief Constructor. Initialize a book.
  *
- * @return Return the initialized indexbook if it was done correctly, 
+ * @return Return the initialized book if it was done correctly, 
  * otherwise return NULL.
 */
-IndexBook * indexbook_init ();
-
+Book *book_init ();
 
 /**
- * @brief Destructor. Free the dynamic memory reserved for a indexbook .
+ * @brief Destructor. Free the dynamic memory reserved for a book .
  *
- * @param ib a pointer to a indexbook
+ * @param book a pointer to a book
  */
-void indexbook_free (void *ib);
-
+void book_free (void *book);
 
 /**
- * @brief  Gets the indexbook id.
+ * @brief  Gets the book size.
  *
- * @param ib a pointer to a indexbook
+ * @param book a pointer to a book
  *
- * @return  Returns the id of the given indexbook, or -1 in case of error.
+ * @return  Returns an array with the ISBN of the given book.
  */
-int indexbook_getId (const IndexBook *ib);
-
+size_t *book_getSize (const Book *book);
 
 /**
- * @brief Gets the indexbook offset.
+ * @brief  Gets the book id.
  *
- * @param ib a pointer to a indexbook
+ * @param book a pointer to a book
  *
- * @return Returns the Offset of the given indexbook, or -1 in case of error.
+ * @return  Returns the id of the given book, or -1 in case of error.
  */
-long indexbook_getOffset (const IndexBook *ib);
+int book_getId (const Book *book);
 
 /**
- * @brief Gets the indexbook size.
+ * @brief  Gets the book isbn.
  *
- * @param ib a pointer to a indexbook
+ * @param book a pointer to a book
  *
- * @return Returns the size of the given indexbook, or -1 in case of error.
+ * @return  Returns an array with the isbn of the given book.
  */
-size_t indexbook_getSize (const IndexBook *ib);
+char *book_getIsbn (const Book *book);
 
 /**
- * @brief Modifies the id of a given indexbook.
+ * @brief  Gets the book title.
  *
- * @param ib a pointer to a indexbook
- * @param id the id number of a new indexbook, must be equal or greater than 0
+ * @param book a pointer to a book
+ *
+ * @return  Returns an array with the title of the given book.
+ */
+char *book_getTitle (const Book *book);
+
+/**
+ * @brief  Gets the book printedby.
+ *
+ * @param book a pointer to a book
+ *
+ * @return  Returns an array with the printedby of the given book.
+ */
+char *book_getPrintedBy (const Book *book);
+
+/**
+ * @brief Modifies the id of a given book.
+ *
+ * @param ib a pointer to a book
  *
  * @return Returns OK or ERROR in case of error 
  */
-Status indexbook_setId (IndexBook *ib, const int id);
+Status book_setSize (Book *book);
 
 /**
- * @brief Modifies the isbn of a given indexbook.
+ * @brief Modifies the id of a given book.
  *
- * @param ib a pointer to a indexbook
- * @param offset the offset of a new indexbook
+ * @param book a pointer to a book
+ * @param id the id number of a new book, must be equal or greater than 0
  *
  * @return Returns OK or ERROR in case of error 
  */
-Status indexbook_setOffset (IndexBook *ib, const long offset);
+Status book_setId (Book *book, const int id);
 
 /**
- * @brief Modifies the title of a given indexbook.
+ * @brief Modifies the isbn of a given book.
  *
- * @param ib a pointer to a indexbook
- * @param size the size of a new indexbook
+ * @param book a pointer to a book
+ * @param isbn an array with the isbn of a new book
  *
  * @return Returns OK or ERROR in case of error 
  */
-Status indexbook_setSize (IndexBook *ib, const size_t size);
+Status book_setIsbn (Book *book, const char *isbn);
 
 /**
- * @brief Compares indexbooks.
- * 
- * @param ib1 a pointer to a indexbook
- * @param ib2 a pointer to a indexbook
+ * @brief Modifies the title of a given book.
  *
- * @return It returns an integer less than or greater than zero if
- * id of ib1 is found,  respectively, to be less than or be greater 
- * than id of ib2.
+ * @param book a pointer to a book
+ * @param title an array with the title of a new book
+ *
+ * @return Returns OK or ERROR in case of error 
  */
-int indexbook_cmp (const IndexBook *ib1, const IndexBook *ib2);
-
+Status book_setTitle (Book *book, const char *title);
 
 /**
- * @brief Allocates memory for a indexbook where it copies the data from
- * the indexbook src.
- * 
- * @param src a pointer to the original indexbook
+ * @brief Modifies the printedBy of a given book.
  *
- * @return Returns the pointer of the copied indexbook if everything 
- * went well, or NULL otherwise.
+ * @param book a pointer to a book
+ * @param printedBy an array with the printedBy of a new book
+ *
+ * @return Returns OK or ERROR in case of error 
  */
-IndexBook *indexbook_copy (const IndexBook *src);
-
+Status book_setPrintedBy (Book *book, const char *printedBy);
 
 /** 
- * @brief Prints in pf the data of a indexbook.
+ * @brief Prints in pf the data of a book.
  *
  * @param pf a pointer to a file
- * @param ib a pointer to a indexbook
+ * @param ib a pointer to a book
  *
  * @return Returns the number of characters that have been written 
  * successfully. If there have been errors returns -1.
  */
-int indexbook_print (FILE *pf, const IndexBook *ib);
+int book_print (FILE *pf, const Book *book);
 
 #endif

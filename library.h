@@ -3,21 +3,22 @@
 
 #include "types.h"
 #include "file_utils.h"
-#include "book.h"
+#include "indexbook.h"
 /**
  * Index type definition: a binary search of arbitrary elements.
  */
 typedef struct _Index Index;
 
 /**
- * @brief Public function that creates a new BSTree.
+ * @brief Public function that creates a new Index.
  *
- * @param print_ele Pointer to the function that prints a Tree element.
- * @param cmp_ele Pointer to the function that compares two Tree elements
+ * @param print_ele Pointer to the function that prints a index element.
+ * @param cmp_ele Pointer to the function that compares two index elements.
+ * @param size_ele Pointer to the function that returns the size of an element in the index.
  *
  * @return Returns the address of the new Tree, or NULL in case of error.
  */
-Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele);
+Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele);
 
 /**
  * @brief Public function that frees a Tree.
@@ -130,10 +131,10 @@ void *index_find_min(Index *index);
 void *index_find_max(Index *index);
 
 /**
- * @brief Public function that tells if an element is in a Binary Search Tree.
+ * @brief Public function that tells if an element is in an index.
  *
- * @param tree Pointer to the Tree.
- * @param elem Pointer to the element to be found in the Tree.
+ * @param index Pointer to an index.
+ * @param elem Pointer to the element to be found in the Index.
  *
  * @return Bool value TRUE if the element was found, FALSE otherwise.
  */

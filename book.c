@@ -1,95 +1,116 @@
 #include "book.h"
 
-struct _IndexBook {
-    int key; /*Book id*/
-    long offset; /*Book is stored in disk at this position*/
-    size_t size; /*Book record size. This is a redundant field that helps in the implementation*/
+struct _Book {
+    size_t size;
+    int id;
+    char *isbn;
+    char *title;
+    char *printedBy;
 };
 
-IndexBook *indexbook_init (){
-    IndexBook *ib = NULL;
+Book *book_init (){
+    Book *book = NULL;
 
-    ib = malloc(sizeof(IndexBook));
-    if (!ib) return NULL;
+    if (!(book = malloc(sizeof(Book)))) return NULL;
 
-    ib->key = 0;
-    ib->offset = 0;
+    book->size = 0;
+    book->id = NO_ID;
+    book->isbn = "";
+    book->title = "";
+    book->printedBy = "";
+
+    return book;
+}
+
+void book_free (void *book){
+    if (!book) return;
+
+    free(book);
+}
+
+size_t *book_getSize (const Book *book){
+    if (!book) return NULL;
+
+    return (size_t)book->size;
+}
+
+int book_getId (const Book *book){
+    if (!book) return NO_ID;
+
+    return book->id;
+}
+
+char *book_getIsbn (const Book *book){
+    if (!book) return NULL;
+
+    return book->isbn;
+}
+
+char *book_getTitle (const Book *book){
+    if (!book) return NULL;
+
+    return book->title;
+}
+
+char *book_getPrintedBy (const Book *book){
+    if (!book) return NULL;
+
+    return book->printedBy;
+}
+
+Status book_setSize (Book *book){
     size_t size = 0;
+    if (!book) return ERROR;
 
-    return ib;
+    size += sizeof(book->id);
+    size += sizeof(book->isbn);
+    size += sizeof(book->title);
+    size += sizeof(book->printedBy);
+
+    book->size = size;
+
+    return OK;
 }
 
-void indexbook_free (void *ib){
-    free(ib);
+Status book_setId (Book *book, const int id){
+    if (!book || id < 0) return ERROR;
+
+    book->id = id;
+
+    return book_setSize(book);
 }
 
-int indexbook_getId (const IndexBook *ib){
-    if (!ib) return NO_ID;
+Status book_setIsbn (Book *book, const char *isbn){
+    if (!book || !isbn) return ERROR;
 
-    return ib->key;
+    strcpy(book->isbn, isbn);
+
+    return book_setSize(book);
 }
 
-long indexbook_getOffset (const IndexBook *ib){
-    if (!ib) return NO_ID;
+Status book_setTitle (Book *book, const char *title){
+    if (!book || !title) return ERROR;
 
-    return ib->offset;
+    strcpy(book->title, title);
+
+    return book_setSize(book);
 }
 
-size_t indexbook_getSize (const IndexBook *ib){
-    if (!ib) return NO_ID;
+Status book_setPrintedBy (Book *book, const char *printedBy){
+    if (!book || !printedBy) return ERROR;
 
-    return ib->size;
+    strcpy(book->printedBy, printedBy);
+
+    return book_setSize(book);
 }
 
-/**
- * @brief Modifies the id of a given indexbook.
+/** 
+ * @brief Prints in pf the data of a book.
  *
- * @param ib a pointer to a indexbook
- * @param id the id number of a new indexbook, must be equal or greater than 0
+ * @param pf a pointer to a file
+ * @param book a pointer to a book
  *
- * @return Returns OK or ERROR in case of error 
+ * @return Returns the number of characters that have been written 
+ * successfully. If there have been errors returns -1.
  */
-Status indexbook_setId (IndexBook *ib, const int id);
-
-Status indexbook_setOffset (IndexBook *ib, const long offset){
-    if (!ib || offset < 0) return ERROR;
-
-    ib->offset = offset;
-}
-
-Status indexbook_setSize (IndexBook *ib, const size_t size){
-    if (!ib || size < 0) return ERROR;
-
-    ib->size = size;
-}
-
-int indexbook_cmp (const IndexBook *ib1, const IndexBook *ib2){
-    if (!ib1 || !ib2) return 0;
-
-    return int_cmp(ib1->key, ib2->key);
-}
-
-IndexBook *indexbook_copy (const IndexBook *src){
-    IndexBook *ib = NULL;
-
-    if (!src || src->key < 0 || src->offset < 0 || src->size < 0) return NULL;
-
-    if (!(ib = indexbook_init())) return NULL;
-
-    ib->key = src->key;
-    ib->offset = src->offset;
-    ib->size = src->size;
-
-    return ib;
-}
-
-int indexbook_print (FILE *pf, const IndexBook *ib){
-    int count = 0;
-    
-    if (!pf || !ib) return -1;
-
-    count += fprintf(pf, "\t Key: #%5d\n", ib->key);
-    count += fprintf(pf, "\t Offset: #%d\n", ib->offset);
-
-    return count;
-}
+int book_print (FILE *pf, const Book *book);

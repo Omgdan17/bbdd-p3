@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -g -Wall -pedantic
 
-library: loop.o add.o library.o book.o
-	$(CC) $(CFLAGS) -o library loop.o add.o library.o book.o
+library: loop.o add.o library.o indexbook.o book.o
+	$(CC) $(CFLAGS) -o library loop.o add.o library.o indexbook.o book.o
 
 loop.o: loop.c
 	$(CC) $(CFLAGS) -c loop.c
@@ -13,11 +13,17 @@ add.o: add.c
 library.o: library.c
 	$(CC) $(CFLAGS) -c library.c
 
+indexbook.o: indexbook.c
+	$(CC) $(CFLAGS) -c indexbook.c
+
 book.o: book.c
 	$(CC) $(CFLAGS) -c book.c
 
 run:
 	./library
+
+runv:
+	valgrind ./library
 
 clean:
 	rm -rf *.o

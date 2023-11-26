@@ -12,9 +12,9 @@ typedef void *(*elem_from_string)(const char *str);
 typedef void (*process_element)(const void *element);
 
 /* generic function type to TAD wrappers*/
-typedef Status (*tad_insert)(void *tad, const void *elem);
+/*typedef Status (*tad_insert)(void *tad, const void *elem);
 typedef void * (*tad_extract)(void *tad);
-typedef Bool (*tad_isEmpty)(const void * tad);
+typedef Bool (*tad_isEmpty)(const void * tad);*/
 
 //---------------------------------------------------------
 // functions to manage pointer types
@@ -62,8 +62,8 @@ void *str2chr(const char *str);
 
 int read_line (FILE *fp, char *buffer);
 
-Status read_tad_from_file (void *tad, char *filename, elem_from_string convert,
-        tad_insert f_insert, tad_isEmpty f_isEmpty);
+/*Status read_tad_from_file (void *tad, char *filename, elem_from_string convert,
+        tad_insert f_insert, tad_isEmpty f_isEmpty);*/
 
 
 #endif

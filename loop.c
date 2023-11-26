@@ -34,9 +34,8 @@ void loop(Index *index){
                 isbn = strtok(NULL, "|");
                 title = strtok(NULL, "|");
                 printedBy = strtok(NULL, " ");
-                if (!add(index, id, isbn, title, printedBy))
-                    printf("Something ocurred and the book couldn't be added");
-                printf("Record with BookID=12346 has been added to the database");
+                if (add(index, id, isbn, title, printedBy))
+                    printf("Record with BookID=12346 has been added to the database");
             case FIND:
                 /*función que busca una entrada*/
             case DEL:
@@ -54,7 +53,7 @@ void loop(Index *index){
 }
 
 Status loop_init(Index *index, FILE *pf){
-    index = index_init(indexbook_print, indexbook_cmp);
+    index = index_init(indexbook_print, indexbook_cmp, indexbook_getSize);
 
     if (!index) return ERROR;
 
@@ -66,6 +65,8 @@ Status loop_init(Index *index, FILE *pf){
 }
 
 void loop_end(Index *index, FILE *pf){
+
+    
 
     /*guadar datos en el fichero*/
 
