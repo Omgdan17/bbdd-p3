@@ -6,7 +6,7 @@ void loop(Index *index){
     char *cmd_to_str[NCMD] = {"exit", "add", "find", "del", "printInd", "printLst", "printRec"};
     int i=0;
     int len;
-    long id;
+    int id;
     char *isbn, *title, *printedBy;
 
     while (cmd != EXIT){
@@ -34,7 +34,9 @@ void loop(Index *index){
                 isbn = strtok(NULL, "|");
                 title = strtok(NULL, "|");
                 printedBy = strtok(NULL, " ");
-                add(index, id, isbn, title, printedBy);
+                if (!add(index, id, isbn, title, printedBy))
+                    printf("Something ocurred and the book couldn't be added");
+                printf("Record with BookID=12346 has been added to the database");
             case FIND:
                 /*función que busca una entrada*/
             case DEL:
@@ -55,6 +57,7 @@ Status loop_init(Index *index, FILE *pf){
     index = index_init(indexbook_print, indexbook_cmp);
 
     if (!index) return ERROR;
+
 
     /*cargar datos del fichero*/
 

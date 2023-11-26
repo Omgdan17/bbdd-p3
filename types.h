@@ -8,12 +8,15 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+#include "file_utils.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #define MAX_LENGTH 512
 #define NCMD 7
+#define NO_ID -1
 
 /**
  * @brief ADT command

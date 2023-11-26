@@ -32,38 +32,26 @@ void indexbook_free (void *ib);
  *
  * @return  Returns the id of the given indexbook, or -1 in case of error.
  */
-long indexbook_getId (const IndexBook *ib);
+int indexbook_getId (const IndexBook *ib);
 
 
 /**
- * @brief Gets the indexbook isbn.
+ * @brief Gets the indexbook offset.
  *
  * @param ib a pointer to a indexbook
  *
- * @return Returns a pointer to the isbn of the indexbook, or NULL in 
- * case of error.
+ * @return Returns the Offset of the given indexbook, or -1 in case of error.
  */
-const char* indexbook_getIsbn (const IndexBook *ib);
+long indexbook_getOffset (const IndexBook *ib);
 
 /**
- * @brief Gets the indexbook title.
+ * @brief Gets the indexbook size.
  *
  * @param ib a pointer to a indexbook
  *
- * @return Returns a pointer to the title of the indexbook, or NULL in 
- * case of error.
+ * @return Returns the size of the given indexbook, or -1 in case of error.
  */
-const char* indexbook_getTitle (const IndexBook *ib);
-
-/**
- * @brief Gets the indexbook printedby.
- *
- * @param ib a pointer to a indexbook
- *
- * @return Returns a pointer to the printedby of the indexbook, or NULL in 
- * case of error.
- */
-const char* indexbook_getPrintedBy (const IndexBook *ib);
+size_t indexbook_getSize (const IndexBook *ib);
 
 /**
  * @brief Modifies the id of a given indexbook.
@@ -73,43 +61,30 @@ const char* indexbook_getPrintedBy (const IndexBook *ib);
  *
  * @return Returns OK or ERROR in case of error 
  */
-Status indexbook_setId (IndexBook *ib, const long id);
+Status indexbook_setId (IndexBook *ib, const int id);
 
 /**
  * @brief Modifies the isbn of a given indexbook.
  *
  * @param ib a pointer to a indexbook
- * @param isbn the isbn of a new indexbook
+ * @param offset the offset of a new indexbook
  *
  * @return Returns OK or ERROR in case of error 
  */
-Status indexbook_setIsbn (IndexBook *ib, const char *isbn);
+Status indexbook_setOffset (IndexBook *ib, const long offset);
 
 /**
  * @brief Modifies the title of a given indexbook.
  *
  * @param ib a pointer to a indexbook
- * @param title the title of a new indexbook
+ * @param size the size of a new indexbook
  *
  * @return Returns OK or ERROR in case of error 
  */
-Status indexbook_setTitle (IndexBook *ib, const char *title);
+Status indexbook_setSize (IndexBook *ib, const size_t size);
 
 /**
- * @brief Modifies the printedby of a given indexbook.
- *
- * @param ib a pointer to a indexbook
- * @param printedby the printedby of a new indexbook
- *
- * @return Returns OK or ERROR in case of error 
- */
-Status indexbook_setPrintedBy (IndexBook *ib, const char *printedby);
-
-/**
- * @brief Compares two vertices.
- *
- * First it compares their ids. If they are equal, then compares
- * their tags.
+ * @brief Compares indexbooks.
  * 
  * @param ib1 a pointer to a indexbook
  * @param ib2 a pointer to a indexbook
@@ -118,7 +93,7 @@ Status indexbook_setPrintedBy (IndexBook *ib, const char *printedby);
  * id of ib1 is found,  respectively, to be less than or be greater 
  * than id of ib2.
  */
-int indexbook_cmp (const void *ib1, const void *ib2);
+int indexbook_cmp (const IndexBook *ib1, const IndexBook *ib2);
 
 
 /**
@@ -130,7 +105,7 @@ int indexbook_cmp (const void *ib1, const void *ib2);
  * @return Returns the pointer of the copied indexbook if everything 
  * went well, or NULL otherwise.
  */
-void *indexbook_copy (const void *src);
+IndexBook *indexbook_copy (const IndexBook *src);
 
 
 /** 
@@ -142,6 +117,6 @@ void *indexbook_copy (const void *src);
  * @return Returns the number of characters that have been written 
  * successfully. If there have been errors returns -1.
  */
-int indexbook_print (FILE *pf, const void *ib);
+int indexbook_print (FILE *pf, const IndexBook *ib);
 
 #endif
