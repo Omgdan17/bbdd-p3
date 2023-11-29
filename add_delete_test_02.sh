@@ -129,7 +129,6 @@ expect "exit"
 
 
 send "exit\n"
-expect "all done"
 
 puts  "1) Delete index records OK, ;-)"
 

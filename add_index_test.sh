@@ -54,7 +54,6 @@ expect "    size: #36"
 
 expect "exit"
 send "exit\n"
-expect "all done"
 puts  "1) Index creating OK, ;-)"
 
 

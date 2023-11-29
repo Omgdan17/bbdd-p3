@@ -92,6 +92,7 @@ int indexbook_print (FILE *pf, const IndexBook *ib){
 
     count += fprintf(pf, "\t Key: #%5d\n", ib->key);
     count += fprintf(pf, "\t Offset: #%ld\n", ib->offset);
+    count += fprintf(pf, "\t Size: #%ld\n", ib->size);
 
     return count;
 }

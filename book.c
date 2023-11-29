@@ -31,7 +31,7 @@ void book_free (void *book){
 size_t *book_getSize (const Book *book){
     if (!book) return NULL;
 
-    return (size_t)book->size;
+    return book->size;
 }
 
 int book_getId (const Book *book){

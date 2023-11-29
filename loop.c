@@ -9,7 +9,7 @@ void loop(Index *index){
     int id;
     char *isbn, *title, *printedBy;
 
-    if (!index) printf("ERRR\n");
+    if (index == NULL) printf("ERR");
 
     while (cmd != EXIT){
         i = 0;
@@ -38,12 +38,14 @@ void loop(Index *index){
                 printedBy = strtok(NULL, " ");
                 if (add(index, id, isbn, title, printedBy))
                     printf("Record with BookID=12346 has been added to the database\n");
+                break;
             case FIND:
                 /*función que busca una entrada*/
             case DEL:
                 /*función que borra una entrada*/
             case PRINTIND:
-                /*función que hace printInd*/
+                index_inOrder(stdout, index);
+                break;
             case PRINTLST:
                 /*función que hace printLst*/
             case PRINTREC:
@@ -54,9 +56,9 @@ void loop(Index *index){
     }
 }
 
-Status loop_init(Index *index, FILE *pf){
+Status loop_init(Index **index, FILE *pf){
 
-    index = index_init(indexbook_print, indexbook_cmp, indexbook_getSize);
+    *index = index_init(indexbook_print, indexbook_cmp, indexbook_getSize);
 
     if (!index) printf("COOS\n");
 
@@ -79,9 +81,9 @@ void loop_end(Index *index, FILE *pf){
 int main(int argc, char *argv[]){
     Index *index = NULL;
     FILE *f = NULL;
-
     
-    if (loop_init(index, f) == OK){
+    if (loop_init(&index, f) == OK){
+        if (!index) printf("JODER");
         loop(index);
         loop_end(index, f);
     }

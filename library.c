@@ -28,6 +28,7 @@ int _bst_depth_rec(BSTNode *pn);
 size_t index_size_rec(BSTNode *pn, P_ele_size size_ele);
 Bool index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
+int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order);
 
 /**** PUBLIC FUNCTIONS ****/
 
@@ -103,7 +104,13 @@ int index_preOrder(FILE *f, const Index *index);
  *
  * @return See tree_preOrder.
  */
-int index_inOrder(FILE *f, const Index *index);
+int index_inOrder(FILE *f, const Index *index){
+  int order = 0;
+
+  if (!f || !index) return -1;
+
+  return _bst_inOrder_rec(index->root, f, index->print_ele, &order) + fprintf(f, "\n");
+}
 
 /**
  * @brief Same as tree_preOrder but with postOrder algorithm.
@@ -263,4 +270,18 @@ BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
   }
   
   return pn;
+}
+
+int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order){
+  int count = 0;
+
+  if (!pn) return count;
+
+  count += _bst_inOrder_rec(pn->left, pf, print_ele, order);
+  count += fprintf(stdout, "Entry #%d\n", *order);
+  *order++;
+  count += print_ele(pf, pn->info);
+  count += _bst_inOrder_rec(pn->right, pf, print_ele, order);
+
+  return count;
 }
