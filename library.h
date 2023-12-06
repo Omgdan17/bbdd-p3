@@ -18,7 +18,7 @@ typedef struct _Index Index;
  *
  * @return Returns the address of the new Tree, or NULL in case of error.
  */
-Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele);
+Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele, P_ele_free free_ele);
 
 /**
  * @brief Public function that frees a Tree.

@@ -70,4 +70,9 @@ typedef int (*P_ele_cmp)(const void *, const void *);
  */
 typedef int (*P_ele_size)(const void *);
 
+/**
+ * P_ele_free type definition: pointer to a function that frees que memory allocated for an element.
+*/
+typedef void (*P_ele_free)(const void *);
+
 #endif /* TYPES_H_ */

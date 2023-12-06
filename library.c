@@ -17,13 +17,14 @@ struct _Index {
   P_ele_print print_ele;
   P_ele_cmp cmp_ele;
   P_ele_size size_ele;
+  P_ele_free free_ele;
 };
 
 /**** PRIVATE FUNCTIONS HEADINGS ****/
 
 BSTNode *_bst_node_new();
-void _bst_node_free(BSTNode *pn);
-void _bst_node_free_rec(BSTNode *pn);
+void _bst_node_free(BSTNode *pn, P_ele_free free_ele);
+void _bst_node_free_rec(BSTNode *pn, P_ele_free free_ele);
 int _bst_depth_rec(BSTNode *pn);
 size_t index_size_rec(BSTNode *pn, P_ele_size size_ele);
 Bool index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
@@ -32,7 +33,7 @@ int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order);
 
 /**** PUBLIC FUNCTIONS ****/
 
-Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele){
+Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele, P_ele_free free_ele){
   Index *index = NULL;
 
   if (!print_ele || !cmp_ele) return NULL;
@@ -44,6 +45,7 @@ Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele)
   index->print_ele = print_ele;
   index->cmp_ele = cmp_ele;
   index->size_ele = size_ele;
+  index->free_ele = free_ele;
 
   return index;
 }
@@ -51,7 +53,7 @@ Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele)
 void index_destroy(Index *index){
   if (!index) return;
 
-  _bst_node_free_rec(index->root);
+  _bst_node_free_rec(index->root, index->free_ele);
   free(index);
 }
 
@@ -205,18 +207,19 @@ BSTNode *_bst_node_new(){
   return pn;
 }
 
-void _bst_node_free(BSTNode *pn){
+void _bst_node_free(BSTNode *pn, P_ele_free free_ele){
   if (!pn) return;
 
+  free_ele(pn->info);
   free(pn);
 }
 
-void _bst_node_free_rec(BSTNode *pn){
+void _bst_node_free_rec(BSTNode *pn, P_ele_free free_ele){
   if (!pn) return;
 
-  _bst_node_free_rec(pn->left);
-  _bst_node_free_rec(pn->right);
-  _bst_node_free(pn);
+  _bst_node_free_rec(pn->left, free_ele);
+  _bst_node_free_rec(pn->right, free_ele);
+  _bst_node_free(pn, free_ele);
 }
 
 int _bst_depth_rec(BSTNode *pn){
@@ -279,7 +282,7 @@ int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order){
 
   count += _bst_inOrder_rec(pn->left, pf, print_ele, order);
   count += fprintf(stdout, "Entry #%d\n", *order);
-  *order++;
+  (*order)++;
   count += print_ele(pf, pn->info);
   count += _bst_inOrder_rec(pn->right, pf, print_ele, order);
 

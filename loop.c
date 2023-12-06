@@ -37,7 +37,7 @@ void loop(Index *index){
                 title = strtok(NULL, "|");
                 printedBy = strtok(NULL, " ");
                 if (add(index, id, isbn, title, printedBy))
-                    printf("Record with BookID=12346 has been added to the database\n");
+                    printf("Record with BookID=%d has been added to the database\n", id);
                 break;
             case FIND:
                 /*función que busca una entrada*/
@@ -57,11 +57,9 @@ void loop(Index *index){
 }
 
 Status loop_init(Index **index, FILE *pf){
+    *index = index_init(indexbook_print, indexbook_cmp, indexbook_getSize, indexbook_free);
 
-    *index = index_init(indexbook_print, indexbook_cmp, indexbook_getSize);
-
-    if (!index) printf("COOS\n");
-
+    if (!index) return ERROR;
 
     /*cargar datos del fichero*/
 
@@ -80,10 +78,10 @@ void loop_end(Index *index, FILE *pf){
 
 int main(int argc, char *argv[]){
     Index *index = NULL;
-    FILE *f = NULL;
+    FILE *f1 = NULL, *f2 = NULL;
+
     
     if (loop_init(&index, f) == OK){
-        if (!index) printf("JODER");
         loop(index);
         loop_end(index, f);
     }

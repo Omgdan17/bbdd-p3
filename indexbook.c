@@ -60,7 +60,7 @@ Status indexbook_setOffset (IndexBook *ib, const long offset){
 Status indexbook_setSize (IndexBook *ib, const size_t size){
     if (!ib || size < 0) return ERROR;
 
-    ib->size = size;
+    ib->size = size + sizeof(ib->offset);
 
     return OK;
 }
