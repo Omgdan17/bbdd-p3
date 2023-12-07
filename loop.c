@@ -1,6 +1,6 @@
 #include "loop.h"
 
-void loop(Index *index){
+void loop(Index *index, FILE *db){
     Command cmd = NO_CMD;
     char input[MAX_LENGTH] = "", *command; 
     char *cmd_to_str[NCMD] = {"exit", "add", "find", "del", "printInd", "printLst", "printRec"};
@@ -36,7 +36,7 @@ void loop(Index *index){
                 isbn = strtok(NULL, "|");
                 title = strtok(NULL, "|");
                 printedBy = strtok(NULL, " ");
-                if (add(index, id, isbn, title, printedBy))
+                if (add(index, db, id, isbn, title, printedBy))
                     printf("Record with BookID=%d has been added to the database\n", id);
                 break;
             case FIND:
@@ -79,12 +79,17 @@ void loop_end(Index *index, FILE *pf){
 int main(int argc, char *argv[]){
     Index *index = NULL;
     FILE *f1 = NULL, *f2 = NULL;
+    if (argc != 3) return ERROR;
+
+    f2 = fopen(strcat(argv[2], ".db"), "wb");
 
     
-    if (loop_init(&index, f) == OK){
-        loop(index);
-        loop_end(index, f);
+    if (loop_init(&index, f1) == OK){
+        loop(index, f2);
+        loop_end(index, f1);
     }
+
+    fclose(f2);
 
     return 0;
 }

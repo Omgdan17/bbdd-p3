@@ -20,10 +20,10 @@ book.o: book.c
 	$(CC) $(CFLAGS) -c book.c
 
 run:
-	./library
+	./library bestfit test
 
 runv:
-	valgrind ./library
+	valgrind ./library bestfit test
 
 clean:
 	rm -rf *.o

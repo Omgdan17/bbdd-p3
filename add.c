@@ -1,7 +1,7 @@
 #include "add.h"
 #include "indexbook.h"
 
-int add(Index *index, int book_id, char *isbn, char *title, char *printedBy){
+int add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *printedBy){
     IndexBook *ib = NULL;
     size_t size = 0;
     long offset;
@@ -55,11 +55,22 @@ int add(Index *index, int book_id, char *isbn, char *title, char *printedBy){
         return ERROR;
     }
 
-    return add_to_file(offset - 8, book_id, isbn, title, printedBy);
+    return add_to_file(db, size, book_id, isbn, title, printedBy);
 }
 
-int add_to_file(int size, int book_id, char *isbn, char *title, char *printedBy){
+int add_to_file(FILE *db, size_t size, int book_id, char *isbn, char *title, char *printedBy){
+    int i = 0;
     if (size < 0) return ERROR;
 
-    
+    fwrite(&size, sizeof(size_t), 1, db);
+    fwrite(&book_id, sizeof(int), 1, db);
+    for (i=0; i<strlen(isbn); i++)
+        fwrite(&isbn[i], sizeof(char), 1, db);
+    for (i=0; i<strlen(title); i++)
+        fwrite(&title[i], sizeof(char), 1, db);
+    fwrite("|", sizeof(char), 1, db);
+    for (i=0; i<strlen(printedBy); i++)
+        fwrite(&printedBy[i], sizeof(char), 1, db);
+
+    return OK;
 }
