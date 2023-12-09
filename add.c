@@ -63,14 +63,18 @@ int add_to_file(FILE *db, size_t size, int book_id, char *isbn, char *title, cha
     if (size < 0) return ERROR;
 
     fwrite(&size, sizeof(size_t), 1, db);
+    fwrite("|", sizeof(char), 1, db);
     fwrite(&book_id, sizeof(int), 1, db);
+    fwrite("|", sizeof(char), 1, db);
     for (i=0; i<strlen(isbn); i++)
         fwrite(&isbn[i], sizeof(char), 1, db);
+    fwrite("|", sizeof(char), 1, db);
     for (i=0; i<strlen(title); i++)
         fwrite(&title[i], sizeof(char), 1, db);
     fwrite("|", sizeof(char), 1, db);
     for (i=0; i<strlen(printedBy); i++)
         fwrite(&printedBy[i], sizeof(char), 1, db);
+    fwrite("\n", sizeof(char), 1, db);
 
     return OK;
 }

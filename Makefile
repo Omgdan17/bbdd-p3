@@ -27,3 +27,7 @@ runv:
 
 clean:
 	rm -rf *.o
+	rm library
+	rm *.ind
+	rm *.lst
+	rm *.db

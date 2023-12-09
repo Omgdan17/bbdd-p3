@@ -188,7 +188,21 @@ Status index_insert(Index *index, const void *elem){
  * @return Status value OK if the removal could be done or the element was not
  * in the BST, Status value ERROR otherwise.
  */
-Status index_remove(Index *index, const void *elem);
+Status index_remove(Index *index, const void *elem) {
+  BSTNode *aux_elem = index->root;
+  
+  if(!index || !elem || !index_contains(index, elem)) {
+    return ERROR;
+  }
+
+  while(aux_elem != elem) {
+    if(aux_elem > elem) aux_elem = aux_elem->left;
+    if(aux_elem < elem) aux_elem = aux_elem->right;
+  }
+
+  _bst_node_free(aux_elem, free);
+  return OK;
+}
 
 
 

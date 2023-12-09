@@ -7,7 +7,7 @@ void loop(Index *index, FILE *db){
     int i=0;
     int len;
     int id;
-    char *isbn, *title, *printedBy;
+    char *isbn, *title, *printedBy, *aux_string;
 
     if (index == NULL) printf("ERR");
 
@@ -49,7 +49,9 @@ void loop(Index *index, FILE *db){
             case PRINTLST:
                 /*función que hace printLst*/
             case PRINTREC:
-                /*función que hace printRec*/
+                while(fscanf(db, "%s", aux_string) == 1) {
+                    fprintf(stdout, "%s", aux_string);
+                }
             default:
                 break;
         }
