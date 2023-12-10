@@ -68,7 +68,7 @@ typedef int (*P_ele_cmp)(const void *, const void *);
  * P_ele_size type definition: pointer to a function that takes the size of an element. 
  * It returns the size of the element.
  */
-typedef int (*P_ele_size)(const void *);
+typedef size_t (*P_ele_size)(const void *);
 
 /**
  * P_ele_free type definition: pointer to a function that frees que memory allocated for an element.

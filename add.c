@@ -7,7 +7,7 @@ int add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *prin
     long offset;
     int i;
 
-    if (!index) return ERROR;
+    if (!index || !db) return ERROR;
 
     if (!(ib = indexbook_init())){
         fprintf(stderr, "Error allocating memory for the index\n");
@@ -15,7 +15,7 @@ int add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *prin
         return ERROR;
     }
 
-    if (!(indexbook_setId(ib, book_id))){
+    if (!(indexbook_setKey(ib, book_id))){
         fprintf(stderr, "Error saving the index 1\n");
         indexbook_free(ib);
         return ERROR;
@@ -63,18 +63,14 @@ int add_to_file(FILE *db, size_t size, int book_id, char *isbn, char *title, cha
     if (size < 0) return ERROR;
 
     fwrite(&size, sizeof(size_t), 1, db);
-    fwrite("|", sizeof(char), 1, db);
     fwrite(&book_id, sizeof(int), 1, db);
-    fwrite("|", sizeof(char), 1, db);
     for (i=0; i<strlen(isbn); i++)
         fwrite(&isbn[i], sizeof(char), 1, db);
-    fwrite("|", sizeof(char), 1, db);
     for (i=0; i<strlen(title); i++)
         fwrite(&title[i], sizeof(char), 1, db);
     fwrite("|", sizeof(char), 1, db);
     for (i=0; i<strlen(printedBy); i++)
         fwrite(&printedBy[i], sizeof(char), 1, db);
-    fwrite("\n", sizeof(char), 1, db);
 
     return OK;
 }

@@ -32,7 +32,7 @@ void indexbook_free (void *ib);
  *
  * @return  Returns the id of the given indexbook, or -1 in case of error.
  */
-int indexbook_getId (const IndexBook *ib);
+int indexbook_getKey (const IndexBook *ib);
 
 
 /**
@@ -61,7 +61,7 @@ size_t indexbook_getSize (const IndexBook *ib);
  *
  * @return Returns OK or ERROR in case of error 
  */
-Status indexbook_setId (IndexBook *ib, const int id);
+Status indexbook_setKey (IndexBook *ib, const int id);
 
 /**
  * @brief Modifies the offset of a given indexbook.
@@ -93,7 +93,7 @@ Status indexbook_setSize (IndexBook *ib, const size_t size);
  * id of ib1 is found,  respectively, to be less than or be greater 
  * than id of ib2.
  */
-int indexbook_cmp (const IndexBook *ib1, const IndexBook *ib2);
+int indexbook_cmp (const void *ib1, const void *ib2);
 
 
 /**
@@ -117,6 +117,6 @@ IndexBook *indexbook_copy (const IndexBook *src);
  * @return Returns the number of characters that have been written 
  * successfully. If there have been errors returns -1.
  */
-int indexbook_print (FILE *pf, const IndexBook *ib);
+int indexbook_print (FILE *pf, const void *ib);
 
 #endif

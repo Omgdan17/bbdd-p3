@@ -23,7 +23,7 @@ void indexbook_free (void *ib){
     free(ib);
 }
 
-int indexbook_getId (const IndexBook *ib){
+int indexbook_getKey (const IndexBook *ib){
     if (!ib) return NO_ID;
 
     return ib->key;
@@ -41,7 +41,7 @@ size_t indexbook_getSize (const IndexBook *ib){
     return ib->size;
 }
 
-Status indexbook_setId (IndexBook *ib, const int id){
+Status indexbook_setKey (IndexBook *ib, const int id){
     if (!ib) return ERROR;
 
     ib->key = id;
@@ -65,10 +65,10 @@ Status indexbook_setSize (IndexBook *ib, const size_t size){
     return OK;
 }
 
-int indexbook_cmp (const IndexBook *ib1, const IndexBook *ib2){
+int indexbook_cmp (const void *ib1, const void *ib2){
     if (!ib1 || !ib2) return 0;
 
-    return ib1->key - ib2->key;
+    return indexbook_getKey(ib1) - indexbook_getKey(ib2);
 }
 
 IndexBook *indexbook_copy (const IndexBook *src){
@@ -85,14 +85,14 @@ IndexBook *indexbook_copy (const IndexBook *src){
     return ib;
 }
 
-int indexbook_print (FILE *pf, const IndexBook *ib){
+int indexbook_print (FILE *pf, const void *ib){
     int count = 0;
     
     if (!pf || !ib) return -1;
 
-    count += fprintf(pf, "\t Key: #%5d\n", ib->key);
-    count += fprintf(pf, "\t Offset: #%ld\n", ib->offset);
-    count += fprintf(pf, "\t Size: #%ld\n", ib->size);
+    count += fprintf(pf, "    key: #%5d\n", indexbook_getKey(ib));
+    count += fprintf(pf, "    offset: #%ld\n", indexbook_getOffset(ib));
+    /*count += fprintf(pf, "\t Size: #%ld\n", indexbook_getSize(ib));*/
 
     return count;
 }

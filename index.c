@@ -1,4 +1,4 @@
-#include "library.h"
+#include "index.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +30,7 @@ size_t index_size_rec(BSTNode *pn, P_ele_size size_ele);
 Bool index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order);
+void *index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 
 /**** PUBLIC FUNCTIONS ****/
 
@@ -124,6 +125,12 @@ int index_inOrder(FILE *f, const Index *index){
  */
 int index_postOrder(FILE *f, const Index *index);
 
+void *index_find(Index *index, const void *elem){
+  if (!index || index_isEmpty(index) || !elem) return NULL;
+
+  return index_find_rec(index->root, elem, index->cmp_ele);
+}
+
 /**
  * @brief Public function that finds the minimum element in a Binary Search
  * Tree.
@@ -195,12 +202,12 @@ Status index_remove(Index *index, const void *elem) {
     return ERROR;
   }
 
-  while(aux_elem != elem) {
-    if(aux_elem > elem) aux_elem = aux_elem->left;
-    if(aux_elem < elem) aux_elem = aux_elem->right;
+  while(index->cmp_ele(aux_elem, elem) != 0) {
+    if(index->cmp_ele(aux_elem, elem) > 0) aux_elem = aux_elem->left;
+    if(index->cmp_ele(aux_elem, elem) < 0) aux_elem = aux_elem->right;
   }
 
-  _bst_node_free(aux_elem, free);
+  _bst_node_free(aux_elem, index->free_ele);
   return OK;
 }
 
@@ -301,4 +308,16 @@ int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order){
   count += _bst_inOrder_rec(pn->right, pf, print_ele, order);
 
   return count;
+}
+
+void *index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
+  int cmp;
+
+  if (!pn || !elem || !cmp_ele) return NULL;
+
+  cmp = cmp_ele(pn->info, elem);
+
+  if (cmp == 0) return pn->info;
+  else if (cmp < 0) return index_find_rec(pn->right, elem, cmp_ele);
+  else return index_find_rec(pn->left, elem, cmp_ele);
 }

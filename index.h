@@ -1,5 +1,5 @@
-#ifndef LIBRARY_H
-#define LIBRARY_H
+#ifndef INDEX_H
+#define INDEX_H
 
 #include "types.h"
 #include "file_utils.h"
@@ -101,6 +101,8 @@ int index_inOrder(FILE *f, const Index *index);
  * @return See tree_preOrder.
  */
 int index_postOrder(FILE *f, const Index *index);
+
+void *index_find(Index *index, const void *elem);
 
 /**
  * @brief Public function that finds the minimum element in a Binary Search

@@ -1,7 +1,8 @@
 #include "loop.h"
 
-void loop(Index *index, FILE *db){
+void loop(Index *index, char *filename){
     Command cmd = NO_CMD;
+    FILE *f = NULL;
     char input[MAX_LENGTH] = "", *command; 
     char *cmd_to_str[NCMD] = {"exit", "add", "find", "del", "printInd", "printLst", "printRec"};
     int i=0;
@@ -9,7 +10,9 @@ void loop(Index *index, FILE *db){
     int id;
     char *isbn, *title, *printedBy, *aux_string;
 
-    if (index == NULL) printf("ERR");
+    if (index == NULL) return;
+
+    fprintf(stdout, "Type command and argument/s.\n");
 
     while (cmd != EXIT){
         i = 0;
@@ -26,8 +29,6 @@ void loop(Index *index, FILE *db){
             i++;
         }
 
-        
-
         switch(cmd){
             case EXIT:
                 break;
@@ -36,11 +37,18 @@ void loop(Index *index, FILE *db){
                 isbn = strtok(NULL, "|");
                 title = strtok(NULL, "|");
                 printedBy = strtok(NULL, " ");
-                if (add(index, db, id, isbn, title, printedBy))
-                    printf("Record with BookID=%d has been added to the database\n", id);
+                f = fopen(filename, "ab");
+                if (add(index, f, id, isbn, title, printedBy))
+                    fprintf(stdout, "Record with BookID=%d has been added to the database\n", id);
+                fclose(f);
                 break;
             case FIND:
-                /*función que busca una entrada*/
+                id = strtol(strtok(NULL, " "), NULL, 10);
+                f = fopen(filename, "rb");
+                if (!find(index, f, id))
+                    fprintf(stdout, "Record with bookId=%d does not exist\n", id);
+                fclose(f);
+                break;
             case DEL:
                 /*función que borra una entrada*/
             case PRINTIND:
@@ -49,7 +57,7 @@ void loop(Index *index, FILE *db){
             case PRINTLST:
                 /*función que hace printLst*/
             case PRINTREC:
-                while(fscanf(db, "%s", aux_string) == 1) {
+                while(fscanf(f, "%s", aux_string) == 1) {
                     fprintf(stdout, "%s", aux_string);
                 }
             default:
@@ -83,15 +91,13 @@ int main(int argc, char *argv[]){
     FILE *f1 = NULL, *f2 = NULL;
     if (argc != 3) return ERROR;
 
-    f2 = fopen(strcat(argv[2], ".db"), "wb");
 
     
     if (loop_init(&index, f1) == OK){
-        loop(index, f2);
+        loop(index, strcat(argv[2], ".db"));
         loop_end(index, f1);
     }
 
-    fclose(f2);
 
     return 0;
 }

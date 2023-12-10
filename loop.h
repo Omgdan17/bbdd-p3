@@ -2,9 +2,9 @@
 #define LOOP_H
 
 #include "types.h"
-#include "library.h"
+#include "index.h"
 #include "add.h"
-#include "book.h"
+#include "find.h"
 
 void loop();
 
