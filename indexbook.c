@@ -96,3 +96,26 @@ int indexbook_print (FILE *pf, const void *ib){
 
     return count;
 }
+
+int indexbook_save(const IndexBook *ib, FILE *pf){
+    int count = 0, aux;
+
+    if (!ib || !pf) return -1;
+
+    aux = fwrite(&(ib->key), sizeof(int), 1, pf);
+    if (aux == -1) return -1;
+
+    count += aux;
+
+    aux = fwrite(&(ib->offset), sizeof(long), 1, pf);
+    if (aux == -1) return -1;
+
+    count += aux;
+
+    aux = fwrite(&(ib->size), sizeof(size_t), 1, pf);
+    if (aux == -1) return -1;
+
+    count += aux;
+
+    return count;
+}

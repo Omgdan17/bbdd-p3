@@ -177,6 +177,18 @@ Status index_insert(Index *index, const void *elem);
  */
 Status index_remove(Index *index, const void *elem);
 
+int index_numberOfNodes(const Index *index);
+
+int *index_inOrder_keys(const Index *index, P_ele_key key_ele);
+
+Status index_load(Index *index, FILE *pf);
+
+int index_save(const Index *index, FILE *pf);
+
+
+
+
+
 
 
 #endif

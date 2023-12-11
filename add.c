@@ -1,7 +1,7 @@
 #include "add.h"
 #include "indexbook.h"
 
-int add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *printedBy){
+Status add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *printedBy){
     IndexBook *ib = NULL;
     size_t size = 0;
     long offset;
@@ -59,18 +59,19 @@ int add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *prin
 }
 
 int add_to_file(FILE *db, size_t size, int book_id, char *isbn, char *title, char *printedBy){
-    int i = 0;
-    if (size < 0) return ERROR;
+    int i = 0, count=0;
 
-    fwrite(&size, sizeof(size_t), 1, db);
-    fwrite(&book_id, sizeof(int), 1, db);
+    if (!db || size < 0 || book_id < 0 || !isbn || !title || !printedBy) return -1;
+
+    count += fwrite(&size, sizeof(size_t), 1, db);
+    count += fwrite(&book_id, sizeof(int), 1, db);
     for (i=0; i<strlen(isbn); i++)
-        fwrite(&isbn[i], sizeof(char), 1, db);
+        count += fwrite(&isbn[i], sizeof(char), 1, db);
     for (i=0; i<strlen(title); i++)
-        fwrite(&title[i], sizeof(char), 1, db);
-    fwrite("|", sizeof(char), 1, db);
+        count += fwrite(&title[i], sizeof(char), 1, db);
+    count += fwrite("|", sizeof(char), 1, db);
     for (i=0; i<strlen(printedBy); i++)
-        fwrite(&printedBy[i], sizeof(char), 1, db);
+        count += fwrite(&printedBy[i], sizeof(char), 1, db);
 
-    return OK;
+    return count;
 }
