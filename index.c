@@ -89,6 +89,7 @@ int index_inOrder(FILE *f, const Index *index){
   int order = 0;
 
   if (!f || !index) return -1;
+  if (index_isEmpty(index)) return 0;
 
   return _bst_inOrder_rec(index->root, f, index->print_ele, &order) + fprintf(f, "\n");
 }
@@ -125,20 +126,33 @@ Status index_remove(Index *index, const void *elem){
 
   if (!index || !elem || index_isEmpty(index) || !index_contains(index, elem)) return ERROR;
 
-  pn = _bst_find_node_rec(index->root, elem, index->cmp_ele);
-  if (!pn) return ERROR;
+  /*pn = _bst_find_node_rec(index->root, elem, index->cmp_ele);
+  if (!pn) return ERROR;*/
 
-  if (pn == index->root){
+  if (index->cmp_ele(index->root->info, elem) == 0){
     index->root = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
     return OK;
   }
 
-  fat = _bst_find_father(index->root, elem, index->cmp_ele);
+  pn = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
 
-  if (index->cmp_ele(fat->info, elem) < 0)
+  /*if (pn == index->root){
+    index->root = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
+    return OK;
+  }*/
+
+  /*fat = _bst_find_father(index->root, elem, index->cmp_ele);*/
+
+
+  /*if (index->cmp_ele(pn->info, elem) < 0)
+    pn->left = _index_remove_rec(pn->left, elem, index->cmp_ele, index->free_ele);
+  else
+    pn->right = _index_remove_rec(pn->left, elem, index->cmp_ele, index->free_ele);*/
+
+  /*if (index->cmp_ele(fat->info, elem) < 0)
     fat->left =  _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
   else
-    fat->right = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
+    fat->right = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);*/
 
   return OK;
 }
@@ -296,35 +310,82 @@ BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
 }
 
 BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele){
+    BSTNode *aux = NULL;
+
+    if(cmp_ele(elem, pn->info) < 0)
+      {
+        pn->left = _index_remove_rec(pn->left, elem, cmp_ele, free_ele);
+      }
+    else if(cmp_ele(elem, pn->info) > 0)
+      {
+        pn->right = _index_remove_rec(pn->right, elem, cmp_ele, free_ele);
+      }
+    else
+      {
+    /* Now We can delete this node and replace with either minimum element 
+               in the right sub tree or maximum element in the left subtree*/
+        if(pn->right && pn->left)
+          {
+        /* Here we will replace with minimum element in the right sub tree */
+            aux = _bst_find_min_rec(pn->right);
+            pn->info = aux->info; 
+    /* As we replaced it with some other node, we have to delete that node */
+            pn->right = _index_remove_rec(pn->right, aux->info, cmp_ele, free_ele);
+          }
+        else
+           {
+        /* If there is only one or zero children then we can directly 
+                       remove it from the tree and connect its parent to its child */
+            aux = pn;
+             if(pn->left == NULL)
+                    pn = pn->right;
+             else if(pn->right == NULL)
+                    pn = pn->left;
+            _bst_node_free(aux, free_ele); /* temp is longer required */ 
+            }
+    }
+    return pn;
+
+}
+
+/*BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele){
   BSTNode *aux = NULL;
 
 
   if (!pn || !elem || !cmp_ele || !free_ele) return NULL;
+  printf("OK1\n");
 
   if (cmp_ele(pn->info, elem) < 0){
-    pn->left = _index_remove_rec(pn->left, elem, cmp_ele, free_ele);
-    return pn->left;
+    pn->right = _index_remove_rec(pn->right, elem, cmp_ele, free_ele);
+    printf("ERROR1\n");
+    return pn->right;
   }
   else if (cmp_ele(pn->info, elem) > 0){
-    pn->right = _index_remove_rec(pn->right, elem, cmp_ele, free_ele);
-    return pn->right;
+    pn->left = _index_remove_rec(pn->left, elem, cmp_ele, free_ele);
+    printf("ERROR2\n");
+    return pn->left;
   }
   else{
     if (pn->left == NULL && pn->right == NULL){
+      printf("OK2\n");
       _bst_node_free(pn, free_ele);
       return NULL;
     }
     else if (pn->left == NULL){
+      printf("ERROR3\n");
       aux = pn->right;
       _bst_node_free(pn, free_ele);
       return aux;
     }
     else if (pn->right == NULL){
+      printf("ERROR4\n");
       aux = pn->left;
       _bst_node_free(pn, free_ele);
       return aux;
     }
     else{
+      printf("ERROR5\n");
+
       aux = _bst_find_min_rec(pn->right);
       aux->left = pn->left;
       aux->right = pn->right;
@@ -334,7 +395,7 @@ BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_e
   }
 
   return aux;
-}
+}*/
 
 BSTNode *_bst_find_min_rec(BSTNode *pn){
 
