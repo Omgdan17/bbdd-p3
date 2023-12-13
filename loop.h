@@ -5,6 +5,7 @@
 #include "index.h"
 #include "add.h"
 #include "find.h"
+#include "delete.h"
 
 void loop();
 

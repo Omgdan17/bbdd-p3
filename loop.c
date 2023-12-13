@@ -1,6 +1,6 @@
 #include "loop.h"
 
-void loop(Index *index, char *filename){
+void loop(Index *index, Index *lst, char *filename){
     Command cmd = NO_CMD;
     FILE *f = NULL;
     char input[MAX_LENGTH] = "", *command; 
@@ -51,16 +51,18 @@ void loop(Index *index, char *filename){
                 fclose(f);
                 break;
             case DEL:
-                /*función que borra una entrada*/
+                id = strtol(strtok(NULL, " "), NULL, 10);
+                if (delete(index, lst, id) == OK)
+                    fprintf(stdout, "Record with bookId=%d has been deleted\n", id);
+                break;
             case PRINTIND:
                 index_inOrder(stdout, index);
                 break;
             case PRINTLST:
-                /*función que hace printLst*/
+                index_inOrder(stdout, lst);
+                break;
             case PRINTREC:
-                
                 keys = (int*)index_inOrder_keys(index, indexbook_getKey);
-                i = 0;
                 for (i=0; i<index_numberOfNodes(index); i++){
                     f = fopen(filename, "rb");
                     find(index, f, keys[i]);
@@ -68,7 +70,6 @@ void loop(Index *index, char *filename){
                 }
                 
                 free(keys);
-                
                 break;
             default:
                 break;
@@ -77,38 +78,61 @@ void loop(Index *index, char *filename){
 
 }
 
-Status loop_init(Index **index, char *filename){
+Status loop_init(Index **index, Index **lst, char *filename1, char *filename2){
     Status st;
     FILE *f = NULL;
-    *index = index_init(indexbook_print, indexbook_cmp, indexbook_getSize, indexbook_free);
 
-    if (!index) return ERROR;
+    if (!filename1 || !filename2) return ERROR;
 
-    f = fopen(filename, "rb");
+    *index = index_init(indexbook_print, indexbook_cmp, indexbook_getSize, indexbook_free, indexbook_save);
+    *lst = index_init(indexdeleted_print, indexdeleted_cmp, NULL, indexdeleted_free, NULL);
+    if (!index || !lst){
+        index_destroy(*index);
+        index_destroy(*lst);
+        return ERROR;
+    }
+
+    f = fopen(filename1, "rb");
     if (!f) return OK;
 
-    st = index_load(*index, f);
+    st = index_load(*index, f, "indexbook");
 
     fclose(f);
+
+    f = fopen(filename2, "rb");
+    if (!f) return OK;
+
+    st = index_load(*lst, f, "indexdeleted");
+
+    fclose(f);
+
+
 
     return st;
 
 }
 
-void loop_end(Index *index, char *filename){
+void loop_end(Index *index, Index *index_lst, char *ind, char *lst){
     FILE *f = NULL;
 
-    f = fopen(filename, "wb");
+    f = fopen(ind, "wb");
 
     index_save(index, f);
 
     fclose(f);
 
+    f = fopen(lst, "wb");
+
+    index_save(index_lst, f);
+
+    fclose(f);
+
     index_destroy(index);
+    index_destroy(index_lst);
 }
 
 int main(int argc, char *argv[]){
-    Index *index = NULL;
+    Index *index = NULL, *index_lst = NULL;
     char db[32], ind[32], lst[32];
 
     if (argc != 3) return ERROR;
@@ -117,9 +141,9 @@ int main(int argc, char *argv[]){
     sprintf(ind, "%s.ind", argv[2]);
     sprintf(lst, "%s.lst", argv[2]);
     
-    if (loop_init(&index, ind) == OK){
-        loop(index, db);
-        loop_end(index, ind);
+    if (loop_init(&index, &index_lst, ind, lst) == OK){
+        loop(index, index_lst, db);
+        loop_end(index, index_lst, ind, lst);
     }
 
 

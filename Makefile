@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -g -Wall -pedantic
 
-library: loop.o add.o find.o index.o indexbook.o
-	$(CC) $(CFLAGS) -o library loop.o add.o find.o index.o indexbook.o
+library: loop.o add.o find.o index.o indexbook.o indexdeleted.o delete.o
+	$(CC) $(CFLAGS) -o library loop.o add.o find.o index.o indexbook.o indexdeleted.o delete.o
 
 loop.o: loop.c
 	$(CC) $(CFLAGS) -c loop.c
@@ -19,8 +19,11 @@ index.o: index.c
 indexbook.o: indexbook.c
 	$(CC) $(CFLAGS) -c indexbook.c
 
-book.o: book.c
-	$(CC) $(CFLAGS) -c book.c
+indexdeleted.o: indexdeleted.c
+	$(CC) $(CFLAGS) -c indexdeleted.c
+
+delete.o: delete.c
+	$(CC) $(CFLAGS) -c delete.c
 
 run:
 	./library bestfit test

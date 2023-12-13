@@ -97,6 +97,25 @@ int indexbook_print (FILE *pf, const void *ib){
     return count;
 }
 
+IndexBook *indexbook_load(FILE *f){
+    IndexBook *ib = NULL;
+    int key;
+    long offset;
+    size_t size;
+
+    if (!f) return NULL;
+
+    if (fread(&key, sizeof(int), 1, f) != 0 && fread(&offset, sizeof(long), 1, f) != 0 && fread(&size, sizeof(size_t), 1, f) != 0){
+        ib = indexbook_init();
+            if (!ib) return NULL;
+        indexbook_setKey(ib, key);
+        indexbook_setOffset(ib, offset);
+        indexbook_setSize(ib, size - 8);
+    }
+
+    return ib;
+}
+
 int indexbook_save(const IndexBook *ib, FILE *pf){
     int count = 0, aux;
 

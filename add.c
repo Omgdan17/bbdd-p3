@@ -1,5 +1,6 @@
 #include "add.h"
 #include "indexbook.h"
+#include "indexdeleted.h"
 
 Status add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *printedBy){
     IndexBook *ib = NULL;

@@ -4,6 +4,7 @@
 #include "types.h"
 #include "file_utils.h"
 #include "indexbook.h"
+#include "indexdeleted.h"
 /**
  * Index type definition: a binary search of arbitrary elements.
  */
@@ -18,7 +19,7 @@ typedef struct _Index Index;
  *
  * @return Returns the address of the new Tree, or NULL in case of error.
  */
-Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele, P_ele_free free_ele);
+Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele, P_ele_free free_ele, P_ele_save save_ele);
 
 /**
  * @brief Public function that frees a Tree.
@@ -181,7 +182,7 @@ int index_numberOfNodes(const Index *index);
 
 int *index_inOrder_keys(const Index *index, P_ele_key key_ele);
 
-Status index_load(Index *index, FILE *pf);
+Status index_load(Index *index, FILE *pf, char *type);
 
 int index_save(const Index *index, FILE *pf);
 

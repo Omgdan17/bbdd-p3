@@ -119,6 +119,8 @@ IndexBook *indexbook_copy (const IndexBook *src);
  */
 int indexbook_print (FILE *pf, const void *ib);
 
+IndexBook *indexbook_load(FILE *f);
+
 int indexbook_save (const IndexBook *ib, FILE *pf);
 
 /**
@@ -128,8 +130,13 @@ int indexbook_save (const IndexBook *ib, FILE *pf);
 typedef size_t (*P_ele_size)(const IndexBook*);
 
 /**
- * P_ele_key type definition: pointer to a function that takes the key of an structura.
+ * P_ele_key type definition: pointer to a function that takes the key of an structure.
 */
 typedef int (*P_ele_key)(const IndexBook*);
+
+/**
+ * P_ele_save type definition: pointer to a function that saves the data of an indexbook in a file
+*/
+typedef int (*P_ele_save)(const IndexBook*, FILE *f);
 
 #endif

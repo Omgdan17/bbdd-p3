@@ -18,6 +18,7 @@ struct _Index {
   P_ele_cmp cmp_ele;
   P_ele_size size_ele;
   P_ele_free free_ele;
+  P_ele_save save_ele;
 };
 
 /**** PRIVATE FUNCTIONS HEADINGS ****/
@@ -26,21 +27,23 @@ BSTNode *_bst_node_new();
 void _bst_node_free(BSTNode *pn, P_ele_free free_ele);
 void _bst_node_free_rec(BSTNode *pn, P_ele_free free_ele);
 int _bst_depth_rec(BSTNode *pn);
-size_t index_size_rec(BSTNode *pn, P_ele_size size_ele);
-Bool index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
+size_t _index_size_rec(BSTNode *pn, P_ele_size size_ele);
+Bool _index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
+BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele);
+BSTNode *_bst_find_min_rec(BSTNode *pn);
 int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order);
-void *index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
-int index_numberOfNodes_rec(BSTNode *pn);
-void index_inOrder_keys_rec(BSTNode *pn, int *keys, P_ele_key key_ele, int pos);
-int index_save_rec(BSTNode *pn, FILE *pf);
+void *_index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
+int _index_numberOfNodes_rec(BSTNode *pn);
+void _index_inOrder_keys_rec(BSTNode *pn, int *keys, P_ele_key key_ele, int pos);
+int _index_save_rec(BSTNode *pn, FILE *pf, P_ele_save save_ele);
 
 /**** PUBLIC FUNCTIONS ****/
 
-Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele, P_ele_free free_ele){
+Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele, P_ele_free free_ele, P_ele_save save_ele){
   Index *index = NULL;
 
-  if (!print_ele || !cmp_ele || !size_ele || !free_ele) return NULL;
+  /*if (!print_ele || !cmp_ele || !size_ele || !free_ele || !save_ele) return NULL;*/
 
   index = malloc(sizeof(Index));
   if (!index) return NULL;
@@ -50,6 +53,7 @@ Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele,
   index->cmp_ele = cmp_ele;
   index->size_ele = size_ele;
   index->free_ele = free_ele;
+  index->save_ele = save_ele;
 
   return index;
 }
@@ -76,7 +80,7 @@ int index_depth(const Index *index){
 size_t index_size(const Index *index){
   if (!index || !index->size_ele) return -1;
 
-  return index_size_rec(index->root, index->size_ele);
+  return _index_size_rec(index->root, index->size_ele);
 }
 
 int index_inOrder(FILE *f, const Index *index){
@@ -90,13 +94,13 @@ int index_inOrder(FILE *f, const Index *index){
 void *index_find(Index *index, const void *elem){
   if (!index || index_isEmpty(index) || !elem) return NULL;
 
-  return index_find_rec(index->root, elem, index->cmp_ele);
+  return _index_find_rec(index->root, elem, index->cmp_ele);
 }
 
 Bool index_contains(Index *index, const void *elem){
   if (!index || !elem) return TRUE;
 
-  return index_contains_rec(index->root, elem, index->cmp_ele);
+  return _index_contains_rec(index->root, elem, index->cmp_ele);
 }
 
 Status index_insert(Index *index, const void *elem){
@@ -114,24 +118,24 @@ Status index_insert(Index *index, const void *elem){
   return OK;
 }
 
-Status index_remove(Index *index, const void *elem) {
-  BSTNode *aux_elem = index->root;
+void *index_find_min(Index *index){
+  BSTNode *aux = NULL;
+
+  if (!index)
+    return NULL;
+  if (index_isEmpty(index))
+    return NULL;
+
+  aux = _bst_find_min_rec(index->root);
   
-  if (!index || !elem || !index_contains(index, elem)) return ERROR;
-
-  while (index->cmp_ele(aux_elem, elem) != 0){
-    if(index->cmp_ele(aux_elem, elem) > 0) aux_elem = aux_elem->left;
-    if(index->cmp_ele(aux_elem, elem) < 0) aux_elem = aux_elem->right;
-  }
-
-  _bst_node_free(aux_elem, index->free_ele);
-  return OK;
+  return aux->info;
 }
+
 
 int index_numberOfNodes(const Index *index){
   if (!index) return -1;
 
-  return index_numberOfNodes_rec(index->root);
+  return _index_numberOfNodes_rec(index->root);
 }
 
 int *index_inOrder_keys(const Index *index, P_ele_key key_ele){
@@ -143,25 +147,30 @@ int *index_inOrder_keys(const Index *index, P_ele_key key_ele){
   keys = malloc(index_numberOfNodes(index)*sizeof(int));
   if (!keys) return NULL;
 
-  index_inOrder_keys_rec(index->root, keys, key_ele, 0);
+  _index_inOrder_keys_rec(index->root, keys, key_ele, 0);
 
   return keys;
 }
 
-Status index_load(Index *index, FILE *pf){
-  int key;
-  long offset;
-  size_t size;
-  IndexBook *ib;
+Status index_load(Index *index, FILE *pf, char *type){
+  IndexBook *auxb = NULL, *ib = NULL;
+  IndexDeleted *auxd = NULL, *id = NULL;
 
-  if (!index || !pf) return ERROR;
+  if (!index || !pf || !type) return ERROR;
 
-  while (fread(&key, sizeof(int), 1, pf) != 0 && fread(&offset, sizeof(long), 1, pf) != 0 && fread(&size, sizeof(size_t), 1, pf) != 0){
-    ib = indexbook_init();
-    indexbook_setKey(ib, key);
-    indexbook_setOffset(ib, offset);
-    indexbook_setSize(ib, size - 8);
-    index_insert(index, ib);
+  if (strcmp(type, "indexbook") == 0){
+    while ((auxb = indexbook_load(pf)) != NULL){
+      ib = indexbook_copy(auxb);
+      index_insert(index, ib);
+      free(auxb);
+    }    
+  }
+  else if (strcmp(type, "indexdeleted") == 0){
+    while ((auxd = indexdeleted_load(pf))){
+      id = indexdeleted_copy(auxd);
+      index_insert(index, id);
+      free(auxd);
+    }
   }
 
   return OK;
@@ -170,7 +179,7 @@ Status index_load(Index *index, FILE *pf){
 int index_save(const Index *index, FILE *pf){
   if (!index || !pf) return -1;
 
-  return index_save_rec(index->root, pf);
+  return _index_save_rec(index->root, pf, index->save_ele);
 }
 
 
@@ -219,23 +228,23 @@ int _bst_depth_rec(BSTNode *pn){
     return depth_l + 1;
 }
 
-size_t index_size_rec(BSTNode *pn, P_ele_size size_ele){
+size_t _index_size_rec(BSTNode *pn, P_ele_size size_ele){
   size_t size = 0;
 
   if (!pn) return 0;
   if (!size_ele) return -1;
 
-  size += index_size_rec(pn->left, size_ele);
-  size += index_size_rec(pn->right, size_ele);
+  size += _index_size_rec(pn->left, size_ele);
+  size += _index_size_rec(pn->right, size_ele);
   size += size_ele(pn->info);
 
   return size;
 }
 
-Bool index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
+Bool _index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
   if (!pn || !elem || !cmp_ele) return FALSE;
 
-  if (cmp_ele(pn->info, elem) == 0  || index_contains_rec(pn->right, elem, cmp_ele) || index_contains_rec(pn->left, elem, cmp_ele))
+  if (cmp_ele(pn->info, elem) == 0  || _index_contains_rec(pn->right, elem, cmp_ele) || _index_contains_rec(pn->left, elem, cmp_ele))
     return TRUE;
   
   return FALSE;
@@ -261,6 +270,15 @@ BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
   return pn;
 }
 
+BSTNode *_bst_find_min_rec(BSTNode *pn){
+
+  if (!pn) return NULL;
+
+  if (!pn->left) return pn;
+
+  return _bst_find_min_rec(pn->left);
+}
+
 int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order){
   int count = 0;
 
@@ -277,7 +295,7 @@ int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order){
   return count;
 }
 
-void *index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
+void *_index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
   int cmp;
 
   if (!pn || !elem || !cmp_ele) return NULL;
@@ -285,41 +303,41 @@ void *index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
   cmp = cmp_ele(pn->info, elem);
 
   if (cmp == 0) return pn->info;
-  else if (cmp < 0) return index_find_rec(pn->right, elem, cmp_ele);
-  else return index_find_rec(pn->left, elem, cmp_ele);
+  else if (cmp < 0) return _index_find_rec(pn->right, elem, cmp_ele);
+  else return _index_find_rec(pn->left, elem, cmp_ele);
 }
 
-int index_numberOfNodes_rec(BSTNode *pn){
+int _index_numberOfNodes_rec(BSTNode *pn){
   if (!pn) return 0;
 
-  return index_numberOfNodes_rec(pn->left) + index_numberOfNodes_rec(pn->right) + 1;
+  return _index_numberOfNodes_rec(pn->left) + _index_numberOfNodes_rec(pn->right) + 1;
 }
 
-void index_inOrder_keys_rec(BSTNode *pn, int *keys, P_ele_key key_ele, int pos){
+void _index_inOrder_keys_rec(BSTNode *pn, int *keys, P_ele_key key_ele, int pos){
   if (!pn || !keys || !key_ele || pos < 0) return;
 
-  index_inOrder_keys_rec(pn->left, keys, key_ele, pos);
+  _index_inOrder_keys_rec(pn->left, keys, key_ele, pos);
   keys[pos] = key_ele(pn->info);
   pos++;
-  index_inOrder_keys_rec(pn->right, keys, key_ele, pos);
+  _index_inOrder_keys_rec(pn->right, keys, key_ele, pos);
 }
 
-int index_save_rec(BSTNode *pn, FILE *pf){
+int _index_save_rec(BSTNode *pn, FILE *pf, P_ele_save save_ele){
   int count=0, aux;
 
-  if (!pn || !pf) return 0;
+  if (!pn || !pf || !save_ele) return 0;
 
-  aux = index_save_rec(pn->left, pf);
+  aux = _index_save_rec(pn->left, pf, save_ele);
   if (aux == -1) return -1;
 
   count += aux;
 
-  aux = indexbook_save(pn->info, pf);
+  aux = save_ele(pn->info, pf);
   if (aux == -1) return -1;
 
   count += aux;
 
-  aux = index_save_rec(pn->right, pf);
+  aux = _index_save_rec(pn->right, pf, save_ele);
   if (aux == -1) return -1;
 
   count += aux;

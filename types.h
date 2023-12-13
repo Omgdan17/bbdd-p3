@@ -69,6 +69,11 @@ typedef int (*P_ele_cmp)(const void *, const void *);
 */
 typedef void (*P_ele_free)(void *);
 
+/**
+ * P_ele_load type definition: pointer to a function that loads the data of a file on an indexbook
+*/
+typedef void* (*P_ele_load)(FILE *f);
+
 
 
 #endif /* TYPES_H_ */
