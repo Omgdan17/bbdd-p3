@@ -32,6 +32,8 @@ Bool _index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele);
 BSTNode *_bst_find_min_rec(BSTNode *pn);
+BSTNode *_bst_find_node_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
+BSTNode *_bst_find_father(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order);
 void *_index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 int _index_numberOfNodes_rec(BSTNode *pn);
@@ -115,6 +117,29 @@ Status index_insert(Index *index, const void *elem){
   
   index->root = pn;
   
+  return OK;
+}
+
+Status index_remove(Index *index, const void *elem){
+  BSTNode *pn = NULL, *fat = NULL;
+
+  if (!index || !elem || index_isEmpty(index) || !index_contains(index, elem)) return ERROR;
+
+  pn = _bst_find_node_rec(index->root, elem, index->cmp_ele);
+  if (!pn) return ERROR;
+
+  if (pn == index->root){
+    index->root = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
+    return OK;
+  }
+
+  fat = _bst_find_father(index->root, elem, index->cmp_ele);
+
+  if (index->cmp_ele(fat->info, elem) < 0)
+    fat->left =  _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
+  else
+    fat->right = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
+
   return OK;
 }
 
@@ -270,6 +295,47 @@ BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
   return pn;
 }
 
+BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele){
+  BSTNode *aux = NULL;
+
+
+  if (!pn || !elem || !cmp_ele || !free_ele) return NULL;
+
+  if (cmp_ele(pn->info, elem) < 0){
+    pn->left = _index_remove_rec(pn->left, elem, cmp_ele, free_ele);
+    return pn->left;
+  }
+  else if (cmp_ele(pn->info, elem) > 0){
+    pn->right = _index_remove_rec(pn->right, elem, cmp_ele, free_ele);
+    return pn->right;
+  }
+  else{
+    if (pn->left == NULL && pn->right == NULL){
+      _bst_node_free(pn, free_ele);
+      return NULL;
+    }
+    else if (pn->left == NULL){
+      aux = pn->right;
+      _bst_node_free(pn, free_ele);
+      return aux;
+    }
+    else if (pn->right == NULL){
+      aux = pn->left;
+      _bst_node_free(pn, free_ele);
+      return aux;
+    }
+    else{
+      aux = _bst_find_min_rec(pn->right);
+      aux->left = pn->left;
+      aux->right = pn->right;
+      _bst_node_free(pn, free_ele);
+      return aux;
+    }
+  }
+
+  return aux;
+}
+
 BSTNode *_bst_find_min_rec(BSTNode *pn){
 
   if (!pn) return NULL;
@@ -277,6 +343,36 @@ BSTNode *_bst_find_min_rec(BSTNode *pn){
   if (!pn->left) return pn;
 
   return _bst_find_min_rec(pn->left);
+}
+
+BSTNode *_bst_find_node_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
+  /*check arguments*/
+  if (!pn || !elem || !cmp_ele) return NULL;
+
+  if (cmp_ele(elem, pn->info) < 0)
+    return _bst_find_node_rec(pn->left, elem, cmp_ele);
+  else if (cmp_ele(elem, pn->info) > 0)
+    return _bst_find_node_rec(pn->right, elem, cmp_ele);
+  else
+    return pn;
+}
+BSTNode *_bst_find_father(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
+  if (!pn || !elem || !cmp_ele) return NULL;
+
+  if (cmp_ele(pn->info, elem) == 0) return NULL;
+
+  if (cmp_ele(pn->info, elem) > 0){
+    if (cmp_ele(pn->left->info, elem) == 0)
+      return pn;
+    else
+      return _bst_find_father(pn->left, elem, cmp_ele);
+  }
+  else{
+    if (cmp_ele(pn->right->info, elem) == 0)
+      return pn;
+    else
+      return _bst_find_father(pn->right, elem, cmp_ele);
+  }
 }
 
 int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order){
