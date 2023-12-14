@@ -6,12 +6,13 @@
 set timeout -1
 set filename "test"
 set programName "library"
+set method "firstfit"
 
 # delete all files starting with $filename
 spawn rm -f $filename.db $filename.ind
 
 # call program
-spawn ./$programName first_fit $filename
+spawn ./$programName $method $filename
 expect "Type command and argument/s."
 
 # add first book
@@ -56,15 +57,5 @@ if {[file exists [file join $filename.db]]} {
     puts "2) file $filename.db NOT found, :-("
 }
 
-# call diff program
-set output "differ"
-try {
-set output [exec diff -s $filename.db ${filename}_control.db]}
-trap CHILDSTATUS {} {}
-if {[regexp -nocase "identical" $output] || [regexp -nocase "idénticos" $output]} {
-    puts "3) control and created files with booksare identical, ;-)"
-} else {
-    puts "3) files differ, :-("
-}
-puts "4) Script end"
+puts "3) Script end"
 

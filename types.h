@@ -16,6 +16,7 @@
 
 #define MAX_LENGTH 512
 #define NCMD 7
+#define NMTH 3
 #define NO_ID -1
 
 /**
@@ -31,6 +32,16 @@ typedef enum {
   PRINTLST,
   PRINTREC
 } Command;
+
+/**
+ * @brief ADT method
+*/
+typedef enum {
+  DEFAULT = -1,
+  FIRST,
+  BEST,
+  WORST
+} Method;
 
 /**
  * @brief ADT Boolean

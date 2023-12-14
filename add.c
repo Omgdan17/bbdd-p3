@@ -2,7 +2,7 @@
 #include "indexbook.h"
 #include "indexdeleted.h"
 
-Status add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *printedBy){
+Status add(Index *index, Index *lst, FILE *db, Method method, int book_id, char *isbn, char *title, char *printedBy){
     IndexBook *ib = NULL;
     size_t size = 0;
     long offset;
@@ -37,7 +37,24 @@ Status add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *p
         return ERROR;
     }
 
-    offset = index_size(index);
+    switch(method){
+        case DEFAULT:
+        break;
+        case FIRST:
+            offset = index_firstfit(lst, size);
+        break;
+        case BEST:
+            offset = index_bestfit(lst, size);
+        break;
+        case WORST:
+            offset = index_worstfit(lst, size);
+        break;
+        default:
+        break;
+    }
+
+    if (offset == -1)
+        offset = index_size(index) + index_numberOfNodes(index)*sizeof(long);
 
     if (!(indexbook_setOffset(ib, offset))){
         fprintf(stderr, "Error saving the index 3\n");
@@ -56,7 +73,7 @@ Status add(Index *index, FILE *db, int book_id, char *isbn, char *title, char *p
         return ERROR;
     }
 
-    return add_to_file(db, size, book_id, isbn, title, printedBy);
+    return add_to_file(db, size + sizeof(indexbook_getOffset(ib)), book_id, isbn, title, printedBy);
 }
 
 int add_to_file(FILE *db, size_t size, int book_id, char *isbn, char *title, char *printedBy){

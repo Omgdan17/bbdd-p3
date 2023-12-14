@@ -31,7 +31,6 @@ expect "    key: #12348"
 expect "    offset: #136"
 expect "    size: #36"
 
-expect "exit"
-send "exit\n"
+puts "exit\n"
 puts "1) Index creating OK, ;-)"
 puts "2) Script end"

@@ -32,6 +32,7 @@ Bool _index_contains_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele);
 BSTNode *_bst_find_min_rec(BSTNode *pn);
+BSTNode *_bst_find_max_rec(BSTNode *pn);
 BSTNode *_bst_find_node_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 BSTNode *_bst_find_father(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 int _bst_inOrder_rec(BSTNode *pn, FILE *pf, P_ele_print print_ele, int *order);
@@ -39,6 +40,9 @@ void *_index_find_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele);
 int _index_numberOfNodes_rec(BSTNode *pn);
 void _index_inOrder_keys_rec(BSTNode *pn, int *keys, P_ele_key key_ele, int pos);
 int _index_save_rec(BSTNode *pn, FILE *pf, P_ele_save save_ele);
+long _index_firstfit_rec(Index *index, BSTNode *pn, const int size, P_ele_cmp cmp_ele);
+long _index_bestfit_rec(Index *index, BSTNode *pn, const int size, P_ele_cmp cmp_ele);
+long _index_worstfit_rec(Index *index, BSTNode *pn, const int size, P_ele_cmp cmp_ele);
 
 /**** PUBLIC FUNCTIONS ****/
 
@@ -122,7 +126,6 @@ Status index_insert(Index *index, const void *elem){
 }
 
 Status index_remove(Index *index, const void *elem){
-  BSTNode *pn = NULL, *fat = NULL;
 
   if (!index || !elem || index_isEmpty(index) || !index_contains(index, elem)) return ERROR;
 
@@ -134,7 +137,7 @@ Status index_remove(Index *index, const void *elem){
     return OK;
   }
 
-  pn = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
+  _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
 
   /*if (pn == index->root){
     index->root = _index_remove_rec(index->root, elem, index->cmp_ele, index->free_ele);
@@ -166,6 +169,19 @@ void *index_find_min(Index *index){
     return NULL;
 
   aux = _bst_find_min_rec(index->root);
+  
+  return aux->info;
+}
+
+void *index_find_max(Index *index){
+  BSTNode *aux = NULL;
+
+  if (!index)
+    return NULL;
+  if (index_isEmpty(index))
+    return NULL;
+
+  aux = _bst_find_max_rec(index->root);
   
   return aux->info;
 }
@@ -221,6 +237,23 @@ int index_save(const Index *index, FILE *pf){
   return _index_save_rec(index->root, pf, index->save_ele);
 }
 
+long index_firstfit(Index *index, const int size){
+  if (!index || index_isEmpty(index) || size < 0) return -1;
+
+  return _index_firstfit_rec(index, index->root, size, index->cmp_ele);
+}
+
+long index_bestfit(Index *index, const int size){
+  if (!index || index_isEmpty(index) || size < 0) return -1;
+
+  return _index_bestfit_rec(index, index->root, size, index->cmp_ele);
+}
+
+long index_worstfit(Index *index, const int size){
+  if (!index || index_isEmpty(index) || size < 0) return -1;
+
+  return _index_worstfit_rec(index, index->root, size, index->cmp_ele);
+}
 
 
 /**** PRIVATE FUNCTIONS ****/
@@ -310,92 +343,30 @@ BSTNode *_bst_insert_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
 }
 
 BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele){
-    BSTNode *aux = NULL;
-
-    if(cmp_ele(elem, pn->info) < 0)
-      {
-        pn->left = _index_remove_rec(pn->left, elem, cmp_ele, free_ele);
-      }
-    else if(cmp_ele(elem, pn->info) > 0)
-      {
-        pn->right = _index_remove_rec(pn->right, elem, cmp_ele, free_ele);
-      }
-    else
-      {
-    /* Now We can delete this node and replace with either minimum element 
-               in the right sub tree or maximum element in the left subtree*/
-        if(pn->right && pn->left)
-          {
-        /* Here we will replace with minimum element in the right sub tree */
-            aux = _bst_find_min_rec(pn->right);
-            pn->info = aux->info; 
-    /* As we replaced it with some other node, we have to delete that node */
-            pn->right = _index_remove_rec(pn->right, aux->info, cmp_ele, free_ele);
-          }
-        else
-           {
-        /* If there is only one or zero children then we can directly 
-                       remove it from the tree and connect its parent to its child */
-            aux = pn;
-             if(pn->left == NULL)
-                    pn = pn->right;
-             else if(pn->right == NULL)
-                    pn = pn->left;
-            _bst_node_free(aux, free_ele); /* temp is longer required */ 
-            }
-    }
-    return pn;
-
-}
-
-/*BSTNode *_index_remove_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele, P_ele_free free_ele){
   BSTNode *aux = NULL;
 
-
-  if (!pn || !elem || !cmp_ele || !free_ele) return NULL;
-  printf("OK1\n");
-
-  if (cmp_ele(pn->info, elem) < 0){
-    pn->right = _index_remove_rec(pn->right, elem, cmp_ele, free_ele);
-    printf("ERROR1\n");
-    return pn->right;
-  }
-  else if (cmp_ele(pn->info, elem) > 0){
+  if (cmp_ele(elem, pn->info) < 0)
     pn->left = _index_remove_rec(pn->left, elem, cmp_ele, free_ele);
-    printf("ERROR2\n");
-    return pn->left;
-  }
+  else if (cmp_ele(elem, pn->info) > 0)
+    pn->right = _index_remove_rec(pn->right, elem, cmp_ele, free_ele);
   else{
-    if (pn->left == NULL && pn->right == NULL){
-      printf("OK2\n");
-      _bst_node_free(pn, free_ele);
-      return NULL;
-    }
-    else if (pn->left == NULL){
-      printf("ERROR3\n");
-      aux = pn->right;
-      _bst_node_free(pn, free_ele);
-      return aux;
-    }
-    else if (pn->right == NULL){
-      printf("ERROR4\n");
-      aux = pn->left;
-      _bst_node_free(pn, free_ele);
-      return aux;
+    if (pn->right && pn->left){
+      aux = _bst_find_min_rec(pn->right);
+      pn->info = aux->info;
+      pn->right = _index_remove_rec(pn->right, aux->info, cmp_ele, free_ele);
     }
     else{
-      printf("ERROR5\n");
-
-      aux = _bst_find_min_rec(pn->right);
-      aux->left = pn->left;
-      aux->right = pn->right;
-      _bst_node_free(pn, free_ele);
-      return aux;
+      aux = pn;
+      if (!(pn->left))
+        pn = pn->right;
+      else if (!(pn->right))
+        pn = pn->left;
+      _bst_node_free(aux, free_ele);
     }
   }
 
-  return aux;
-}*/
+  return pn;
+}
 
 BSTNode *_bst_find_min_rec(BSTNode *pn){
 
@@ -404,6 +375,15 @@ BSTNode *_bst_find_min_rec(BSTNode *pn){
   if (!pn->left) return pn;
 
   return _bst_find_min_rec(pn->left);
+}
+
+BSTNode *_bst_find_max_rec(BSTNode *pn){
+  /*check arguments*/
+  if (!pn) return NULL;
+
+  if (!pn->right) return pn;
+
+  return _bst_find_max_rec(pn->right);
 }
 
 BSTNode *_bst_find_node_rec(BSTNode *pn, const void *elem, P_ele_cmp cmp_ele){
@@ -500,4 +480,71 @@ int _index_save_rec(BSTNode *pn, FILE *pf, P_ele_save save_ele){
   count += aux;
 
   return count;
+}
+
+long _index_firstfit_rec(Index *index, BSTNode *pn, const int size, P_ele_cmp cmp_ele){
+  long offset;
+
+  if (!pn) return -1;
+
+  if (indexdeleted_getSize(pn->info) - size > 0){
+    offset = indexdeleted_getOffset(pn->info);
+    indexdeleted_setOffset(pn->info, offset + sizeof(long) + size);
+    indexdeleted_setSize(pn->info, indexdeleted_getSize(pn->info) - sizeof(long) - size);
+    return offset;
+  }
+  else if (indexdeleted_getSize(pn->info) - size == 0){
+    offset = indexdeleted_getOffset(pn->info);
+    index_remove(index, pn->info);
+    return offset;
+  }
+  else
+   return _index_firstfit_rec(index, pn->right, size, cmp_ele);
+
+}
+
+long _index_bestfit_rec(Index *index, BSTNode *pn, const int size, P_ele_cmp cmp_ele){
+  long offset;
+
+  if (!pn) return -1;
+
+  if (indexdeleted_getSize(pn->info) - size == 0){
+    offset = indexdeleted_getOffset(pn->info);
+    index_remove(index, pn->info);
+    return offset;
+  }
+  else if (indexdeleted_getSize(pn->info) - size > 0){
+    offset = _index_bestfit_rec(index, pn->left, size, cmp_ele);
+    if (offset == -1){
+      offset = indexdeleted_getOffset(pn->info);
+      indexdeleted_setOffset(pn->info, offset + sizeof(long) + size);
+      indexdeleted_setSize(pn->info, indexdeleted_getSize(pn->info) - sizeof(long) - size);
+      return offset;
+    }
+    else return offset;
+  }
+  else return _index_bestfit_rec(index, pn->right, size, cmp_ele);
+}
+
+long _index_worstfit_rec(Index *index, BSTNode *pn, const int size, P_ele_cmp cmp_ele){
+  IndexDeleted *id = NULL;
+  long offset;
+
+  if (!pn) return -1;
+
+  id = index_find_max(index);
+
+  if (indexdeleted_getSize(id) - size > 0){
+    offset = indexdeleted_getOffset(pn->info);
+    indexdeleted_setOffset(pn->info, offset + sizeof(long) + size);
+    indexdeleted_setSize(pn->info, indexdeleted_getSize(pn->info) - sizeof(long) - size);
+    return offset;
+  }
+  else if (indexdeleted_getSize(id) - size == 0){
+    offset = indexdeleted_getOffset(pn->info);
+    index_remove(index, pn->info);
+    return offset;
+  }
+  else
+    return -1;
 }

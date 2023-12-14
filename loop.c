@@ -1,6 +1,6 @@
 #include "loop.h"
 
-void loop(Index *index, Index *lst, char *filename){
+void loop(Index *index, Index *lst, Method method, char *filename){
     Command cmd = NO_CMD;
     FILE *f = NULL;
     char input[MAX_LENGTH] = "", *command; 
@@ -39,7 +39,7 @@ void loop(Index *index, Index *lst, char *filename){
                 title = strtok(NULL, "|");
                 printedBy = strtok(NULL, " ");
                 f = fopen(filename, "ab");
-                if (add(index, f, id, isbn, title, printedBy))
+                if (add(index, lst, f, method, id, isbn, title, printedBy))
                     fprintf(stdout, "Record with BookID=%d has been added to the database\n", id);
                 fclose(f);
                 break;
@@ -47,13 +47,15 @@ void loop(Index *index, Index *lst, char *filename){
                 id = strtol(strtok(NULL, " "), NULL, 10);
                 f = fopen(filename, "rb");
                 if (!find(index, f, id))
-                    fprintf(stdout, "Record with bookId=%d does not exist\n", id);
+                    fprintf(stdout, "Record with BookID=%d does not exist\n", id);
                 fclose(f);
                 break;
             case DEL:
                 id = strtol(strtok(NULL, " "), NULL, 10);
                 if (delete(index, lst, id) == OK)
-                    fprintf(stdout, "Record with bookId=%d has been deleted\n", id);
+                    fprintf(stdout, "Record with BookID=%d has been deleted\n", id);
+                else
+                    fprintf(stdout, "Record with BookID=%d does not exist\n", id);
                 break;
             case PRINTIND:
                 index_inOrder(stdout, index);
@@ -133,16 +135,26 @@ void loop_end(Index *index, Index *index_lst, char *ind, char *lst){
 
 int main(int argc, char *argv[]){
     Index *index = NULL, *index_lst = NULL;
+    Method method = DEFAULT;
     char db[32], ind[32], lst[32];
+    char *method_to_str[NMTH] = {"firstfit", "bestfit", "worstfit"};
+    int i=0;
 
     if (argc != 3) return ERROR;
+
+    while (method == DEFAULT && i < NCMD){
+        if (strcmp(argv[1], method_to_str[i]) == 0)
+            method = i;
+        i++;
+    }
 
     sprintf(db, "%s.db", argv[2]);
     sprintf(ind, "%s.ind", argv[2]);
     sprintf(lst, "%s.lst", argv[2]);
+
     
     if (loop_init(&index, &index_lst, ind, lst) == OK){
-        loop(index, index_lst, db);
+        loop(index, index_lst, method, db);
         loop_end(index, index_lst, ind, lst);
     }
 

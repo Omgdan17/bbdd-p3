@@ -52,7 +52,10 @@ Status indexdeleted_setSize (IndexDeleted *id, const size_t size){
 int indexdeleted_cmp (const void *id1, const void *id2){
     if (!id1 || !id2) return 0;
 
-    return indexdeleted_getOffset(id1) - indexdeleted_getOffset(id2);
+    if (indexdeleted_getSize(id1) - indexdeleted_getSize(id2) == 0)
+        return indexdeleted_getOffset(id1) - indexdeleted_getOffset(id2);  
+
+    return indexdeleted_getSize(id1) - indexdeleted_getSize(id2);
 }
 
 IndexDeleted *indexdeleted_copy (const IndexDeleted *src){

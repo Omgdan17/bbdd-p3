@@ -186,6 +186,10 @@ Status index_load(Index *index, FILE *pf, char *type);
 
 int index_save(const Index *index, FILE *pf);
 
+long index_firstfit(Index *index, int size);
+long index_bestfit(Index *index, int size);
+long index_worstfit(Index *index, int size);
+
 
 
 
