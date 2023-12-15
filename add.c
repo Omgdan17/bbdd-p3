@@ -72,7 +72,8 @@ Status add(Index *index, Index *lst, char *filename, Method method, int book_id,
 
     if (index_contains(index, ib) == TRUE)
     {
-        fprintf(stderr, "Record with BookID = %d exists\n", book_id);
+        fprintf(stderr, "Record with BookID=%d exists\n", book_id);
+        indexbook_free(ib);
         return ERROR;
     }
 
