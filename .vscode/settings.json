@@ -1,0 +1,8 @@
+{
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "files.associations": {
+        "file_utils.h": "c",
+        "index.h": "c",
+        "indexbook.h": "c"
+    }
+}

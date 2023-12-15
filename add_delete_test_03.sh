@@ -131,6 +131,10 @@ expect "Entry #1"
 expect "    offset: #90"
 expect "    size: #38"
 
+send "find 12345\r"
+expect "12345|978-2-12345086-3|La busca|Catedra"
+
+send "exit\n"
 puts "exit\n"
 
 puts  "1) Delete index records OK, ;-)"
@@ -141,4 +145,10 @@ if {[file exists [file join $filename.ind]]} {
     puts "2) file $filename.ind NOT found, :-("
 }
 
-puts "3) Script end"
+if {[file exists [file join $filename.lst]]} {
+    puts "3) file $filename.lst Exists, ;-)"
+} else {
+    puts "3) file $filename.lst NOT found, :-("
+}
+
+puts "4) Script end"

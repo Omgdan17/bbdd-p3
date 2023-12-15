@@ -46,6 +46,7 @@ expect "Entry #3"
 expect "    key: #12348"
 expect "    offset: #136"
 
+send "exit\n"
 puts "exit\n"
 
 puts  "1) Four adds OK, ;-)"

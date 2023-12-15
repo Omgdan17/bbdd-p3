@@ -8,8 +8,6 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#include "file_utils.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,44 +17,51 @@
 #define NMTH 3
 #define NO_ID -1
 
+#define IBOOK 0
+#define IDEL 1
+
 /**
  * @brief ADT command
  */
-typedef enum {
-  NO_CMD = -1,
-  EXIT,
-  ADD,
-  FIND,
-  DEL,
-  PRINTIND,
-  PRINTLST,
-  PRINTREC
+typedef enum
+{
+    NO_CMD = -1,
+    EXIT,
+    ADD,
+    FIND,
+    DEL,
+    PRINTIND,
+    PRINTLST,
+    PRINTREC
 } Command;
 
 /**
  * @brief ADT method
-*/
-typedef enum {
-  DEFAULT = -1,
-  FIRST,
-  BEST,
-  WORST
+ */
+typedef enum
+{
+    DEFAULT = -1,
+    FIRST,
+    BEST,
+    WORST
 } Method;
 
 /**
  * @brief ADT Boolean
  */
-typedef enum {
-  FALSE = 0, /*!< False value */
-  TRUE = 1   /*!< True value  */
+typedef enum
+{
+    FALSE = 0, /*!< False value */
+    TRUE = 1   /*!< True value  */
 } Bool;
 
 /**
  * @brief ADT Status
  */
-typedef enum {
-  ERROR = 0, /*!< To codify an ERROR output */
-  OK = 1     /*!< OK output */
+typedef enum
+{
+    ERROR = 0, /*!< To codify an ERROR output */
+    OK = 1     /*!< OK output */
 } Status;
 
 /**
@@ -77,14 +82,17 @@ typedef int (*P_ele_cmp)(const void *, const void *);
 
 /**
  * P_ele_free type definition: pointer to a function that frees que memory allocated for an element.
-*/
+ */
 typedef void (*P_ele_free)(void *);
 
 /**
  * P_ele_load type definition: pointer to a function that loads the data of a file on an indexbook
-*/
-typedef void* (*P_ele_load)(FILE *f);
+ */
+typedef void *(*P_ele_load)(FILE *f);
 
-
+/**
+ * P_ele_save type definition: pointer to a function that saves the data of an indexbook in a file
+ */
+typedef int (*P_ele_save)(const void *, FILE *pf);
 
 #endif /* TYPES_H_ */

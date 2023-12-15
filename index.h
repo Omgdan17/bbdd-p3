@@ -2,7 +2,6 @@
 #define INDEX_H
 
 #include "types.h"
-#include "file_utils.h"
 #include "indexbook.h"
 #include "indexdeleted.h"
 /**
@@ -11,189 +10,193 @@
 typedef struct _Index Index;
 
 /**
- * @brief Public function that creates a new Index.
+ * @brief Function that allocates memory for a new index structure.
  *
- * @param print_ele Pointer to the function that prints a index element.
- * @param cmp_ele Pointer to the function that compares two index elements.
- * @param size_ele Pointer to the function that returns the size of an element in the index.
+ * @param print_ele a pointer to the function that prints an index element.
+ * @param cmp_ele a pointet to the function that compares tow index elements.
+ * @param size_ele a pointer to the function that returns the size of an index element.
+ * @param free_ele a pointer to the function that frees the memory allocated for an index element.
+ * @param save_ele a pointer to the function that saves the data of an index element in a file.
  *
- * @return Returns the address of the new Tree, or NULL in case of error.
+ * @return a pointer to the index structure created or NULL in case of error.
  */
 Index *index_init(P_ele_print print_ele, P_ele_cmp cmp_ele, P_ele_size size_ele, P_ele_free free_ele, P_ele_save save_ele);
 
 /**
- * @brief Public function that frees a Tree.
+ * @brief Function that frees the memory allocated for an index structure.
  *
- * Frees all the memory allocated for the Tree.
+ * @param index a pointer to an index structure.
  *
- * @param tree Pointer to the Tree.
+ * @return no return
  */
 void index_destroy(Index *index);
 
 /**
- * @brief Public function that checks if a Tree is empty.
+ * @brief Function that checks if an index estructure is empty.
  *
- * Note that the return value is TRUE for a NULL Tree.
+ * @param index a pointer to an index structure.
  *
- * @param tree Pointer to the Tree.
- *
- * @return Bool value TRUE if the Tree is empty or NULL, Bool value FALSE
- * otherwise.
+ * @return TRUE if the index is empty, FALSE if not.
  */
 Bool index_isEmpty(const Index *index);
 
 /**
- * @brief Public function that returns the Tree's depth.
+ * @brief Function that returns the size of an index structure.
  *
- * @param tree Pointer to the Tree.
+ * @param index a pointer to an index structure.
  *
- * @return -1 if the tree is empty, its depth otherwise, -1 for a NULL Tree.
- */
-int index_depth(const Index *index);
-
-/**
- * @brief Public function that returns the Tree's size (its number of elements).
- *
- * @param tree Pointer to the Tree.
- *
- * @return 0 if the tree is empty, its size otherwise, -1 for a NULL Tree.
+ * @return the index's size or -1 in case of error.
  */
 size_t index_size(const Index *index);
 
 /**
- * @brief Public functions that prints the content of a Tree
- * when traversed with preOrder algorithm.
+ * @brief Function that prints the data of an index strcuture in a file.
  *
- * Prints all the elements in the Tree to an output stream.
- * To print an element this function calls the function specified when creating
- * the Tree, print_ele.
+ * @param index a pointer to an index structure.
+ * @param pf a pointer to a file.
  *
- * Note that this function simply calls the print_ele function for each Tree
- * element, without printing any additional information. Any desired format must
- * be included in the print_ele function.
- *
- * @param f Output stream.
- * @param tree Pointer to the Tree.
- *
- * @return The sum of the return values of all the calls to print_ele if these
- * values are all positive; the first negative value encountered otherwise. If
- * the function print_ele is well constructed, this means that, upon successful
- * return, this function returns the number of characters printed, and a
- * negative value if an error occurs.
+ * @return the number of characters printed or -1 in case of error.
  */
-int index_preOrder(FILE *f, const Index *index);
+int index_print(const Index *index, FILE *pf);
 
 /**
- * @brief Same as tree_preOrder but with inOrder algorithm.
+ * @brief Function that returns the element from an index structure by a given field.
  *
- * @param f Output stream.
- * @param tree Pointer to the Tree.
+ * This is very useful when the element is a structure with different fields and
+ * we use just one field to check if two structures are equal or not (primary key).
  *
- * @return See tree_preOrder.
+ * @param index a pointer to an index structure.
+ * @param elem a pointer to the element to find.
+ *
+ * @return a pointer to the data structure in the element.
  */
-int index_inOrder(FILE *f, const Index *index);
+void *index_find(const Index *index, const void *elem);
 
 /**
- * @brief Same as tree_preOrder but with postOrder algorithm.
+ * @brief Function that returns the minimum element of an index structure (the most lefted element).
  *
- * @param f Output stream.
- * @param tree Pointer to the Tree.
+ * @param index a pointer to an index structure.
  *
- * @return See tree_preOrder.
+ * @return a pointer to the minimum element.
  */
-int index_postOrder(FILE *f, const Index *index);
-
-void *index_find(Index *index, const void *elem);
+void *index_find_min(const Index *index);
 
 /**
- * @brief Public function that finds the minimum element in a Binary Search
- * Tree.
+ * @brief Function that returns the maximum element of an index structure (the most righted element).
  *
- * Note that it is necessary to descend the subtree to obtain the
- * minimum element. So this operation is linear with the length of the path
- * from the leaf to the root.
+ * @param index a pointer to an index structure.
  *
- * @param tree Pointer to the Tree.
- *
- * @return Pointer to the minimum element if found, NULL otherwise.
+ * @return a pointer to the maximum element.
  */
-void *index_find_min(Index *index);
+void *index_find_max(const Index *index);
 
 /**
- * @brief Public function that finds the maximum element in a Binary Search
- * Tree.
+ * @brief Function that checks if an element is in an index structure.
  *
- * Note that it is necessary to descend the subtree to obtain the
- * maximum element. So this operation is linear with the length of the path
- * from the leaf to the root.
+ * Note that this only checks if there is an element with the same primary key, just checking
+ * the strcuture's fields added to the cmp function of the data structure.
  *
- * @param tree Pointer to the Tree.
+ * @param index a pointer to an index structure.
+ * @param elem a pointer to the element to find.
  *
- * @return Pointer to the maximum element if found, NULL otherwise.
+ * @return TRUE if the element was found, FALSE if not.
  */
-void *index_find_max(Index *index);
+Bool index_contains(const Index *index, const void *elem);
 
 /**
- * @brief Public function that tells if an element is in an index.
+ * @brief Function that inserts a new element in an index structure.
  *
- * @param index Pointer to an index.
- * @param elem Pointer to the element to be found in the Index.
+ * @param index a pointer to an index structure.
+ * @param elem a pointer to the element to insert.
  *
- * @return Bool value TRUE if the element was found, FALSE otherwise.
- */
-Bool index_contains(Index *index, const void *elem);
-
-/**
- * @brief Public function that inserts an element into a Binary Search Tree.
- *
- * Inserts as a leaf the pointer of the element received as argument. If the
- * element is already in the BST it returns OK.
- *
- * Note that it is necessary to descend the subtree to obtain the
- * insert position. So this operation is linear with the length of the path
- * from the leaf to the root.
- *
- * @param tree Pointer to the Tree.
- * @param elem Pointer to the element to be inserted into the Tree.
- *
- * @return Status value OK if the insertion could be done or the element was
- * already in the BST, Status value ERROR otherwise.
+ * @return OK if everything goes well, ERROR if not.
  */
 Status index_insert(Index *index, const void *elem);
 
 /**
- * @brief Public function that removes an element into a Binary Search Tree.
+ * @brief Function that removes an element form an index structure.
  *
- * Removes the (first) occurrence of the element received as argument.
+ * @param index a pointer to an index structure.
+ * @param elem a pointer to the element to remove.
  *
- * Note that it is necessary to descend the subtree to obtain the
- * remove position. So this operation is linear with the length of the path
- * from the leaf to the root.
- *
- * @param tree Pointer to the Tree.
- * @param elem Pointer to the element to be removed from the Tree.
- *
- * @return Status value OK if the removal could be done or the element was not
- * in the BST, Status value ERROR otherwise.
+ * @return OK if everything goes well, ERROR if not.
  */
 Status index_remove(Index *index, const void *elem);
 
-int index_numberOfNodes(const Index *index);
+/**
+ * @brief Function that returns the number of elements of an index structure.
+ *
+ * @param index a pointer to an index structure.
+ *
+ * @return the number of elements of the index strcuture, -1 in case of error.
+ */
+int index_numberOfElements(const Index *index);
 
-int *index_inOrder_keys(const Index *index, P_ele_key key_ele);
+/**
+ * @brief Function that returns an array with the primary keys in order of all the elements in the index.
+ *
+ * @param index a pointer to an index structure.
+ * @param key_ele a pointer to a function that returns the primary key of an element.
+ *
+ * @return an array with the primary keys of the index structure.
+ */
+int *index_keys(const Index *index, P_ele_key key_ele);
 
-Status index_load(Index *index, FILE *pf, char *type);
+/**
+ * @brief Function that loads the data of a file in an index structure.
+ *
+ * @param index a pointer to an index structure.
+ * @param pf a pointer to a file.
+ * @param type the type of element in the index.
+ *
+ * @return OK if everything goes well, ERROR if not.
+ */
+Status index_load(Index *index, FILE *pf, int type);
 
+/**
+ * @brief Function that saves the data of an index structure in a file.
+ *
+ * @param index a pointer to an index structure.
+ * @param pf a pointer to a file.
+ *
+ * @return the number of characters written, -1 in case of error
+ */
 int index_save(const Index *index, FILE *pf);
 
+/**
+ * @brief Function that returns the offset where a new element is going to be stored.
+ *
+ * It follows the firstfit algorithm, taking the first gap with a bigger size than the element's.
+ *
+ * @param index a pointer to the index structure.
+ * @param size the size of the new element.
+ *
+ * @return the offset choosen or -1 if there wasn't a gap big enough.
+ */
 long index_firstfit(Index *index, int size);
+
+/**
+ * @brief Function that returns the offset where a new element is going to be stored.
+ *
+ * It follows the best algorithm, taking the smallest gap with a bigger size than the element's.
+ *
+ * @param index a pointer to the index structure.
+ * @param size the size of the new element.
+ *
+ * @return the offset choosen or -1 if there wasn't a gap big enough.
+ */
 long index_bestfit(Index *index, int size);
+
+/**
+ * @brief Function that returns the offset where a new element is going to be stored.
+ *
+ * It follows the worstfit algorithm, taking the gap with the biggest size (if it is bigger than the element's).
+ *
+ * @param index a pointer to the index structure.
+ * @param size the size of the new element.
+ *
+ * @return the offset choosen or -1 if there wasn't a gap big enough.
+ */
 long index_worstfit(Index *index, int size);
-
-
-
-
-
-
 
 #endif

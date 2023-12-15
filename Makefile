@@ -25,8 +25,14 @@ indexdeleted.o: indexdeleted.c
 delete.o: delete.c
 	$(CC) $(CFLAGS) -c delete.c
 
-run:
+firstfit:
+	./library firstfit test
+
+bestfit:
 	./library bestfit test
+
+worstfit:
+	./library worstfit test
 
 runv:
 	valgrind ./library bestfit test
